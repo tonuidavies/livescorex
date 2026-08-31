@@ -84,9 +84,7 @@ export function MatchHeader({
             <Text style={[styles.bigScore, { color: '#FFF' }]}>{kickoffTime(match.kickoff)}</Text>
           )}
           <Text style={[t.body, { color: 'rgba(255,255,255,0.6)', marginTop: 2 }]}>
-            {match.halftimeScore
-              ? `HT ${match.halftimeScore.home}:${match.halftimeScore.away}`
-              : played ? match.statusLabel : 'Today'}
+            {subtitle(match, live, played)}
           </Text>
         </View>
 
@@ -99,6 +97,22 @@ export function MatchHeader({
       </View>
     </View>
   );
+}
+
+/**
+ * The line under the big score.
+ *
+ * It must never show a minute: the interpolated clock already occupies the
+ * top-right, and the raw status label lags it by design, so rendering both put
+ * "70'" and "69'" on screen at once.
+ */
+function subtitle(match: Match, live: boolean, played: boolean): string {
+  if (match.halftimeScore) {
+    return `HT ${match.halftimeScore.home}:${match.halftimeScore.away}`;
+  }
+  if (live) return match.state === 'halftime' ? 'Half time' : 'Live';
+  if (played) return match.statusLabel;
+  return 'Today';
 }
 
 function TeamBlock({

@@ -383,48 +383,76 @@ function normaliseStats(boxscore: any): TeamStat[] {
 
 /* ----------------------------------------------------------------- events */
 
-const EVENT_TYPE: Record<string, MatchEvent['type']> = {
-  'goal': 'goal',
-  'own-goal': 'own-goal',
-  'penalty---scored': 'penalty',
-  'penalty---missed': 'penalty-missed',
-  'penalty-shootout---scored': 'penalty',
-  'yellow-card': 'yellow',
-  'red-card': 'red',
-  'second-yellow-card': 'second-yellow',
-  'substitution': 'substitution',
-  'kickoff': 'period',
-  'halftime': 'period',
-  'start-2nd-half': 'period',
-  'end-regular-time': 'period',
-  'full-time': 'period',
-};
+/**
+ * Event types.
+ *
+ * The feed suffixes variants onto a base kind — `goal---header`,
+ * `goal---volley`, `penalty---scored` — so matching is prefix-based. An
+ * exact-match table missed every headed goal, which then rendered as a
+ * generic row with no ball icon.
+ */
+function mapEventType(raw: string): MatchEvent['type'] {
+  const t = raw.toLowerCase();
+  if (t.startsWith('own-goal')) return 'own-goal';
+  if (t.startsWith('penalty') && t.includes('miss')) return 'penalty-missed';
+  if (t.startsWith('penalty')) return 'penalty';
+  if (t.startsWith('goal')) return 'goal';
+  if (t.startsWith('second-yellow')) return 'second-yellow';
+  if (t.startsWith('yellow')) return 'yellow';
+  if (t.startsWith('red')) return 'red';
+  if (t.startsWith('substitution')) return 'substitution';
+  if (t.includes('var') || t.includes('review')) return 'var';
+  if (['kickoff', 'halftime', 'start-2nd-half', 'end-regular-time', 'full-time',
+       'start-1st-extra', 'start-2nd-extra', 'end-extra-time', 'penalty-shootout']
+       .some(p => t.startsWith(p))) return 'period';
+  return 'other';
+}
 
-function normaliseEvents(keyEvents: any[], homeTeamId: string, awayTeamId: string): MatchEvent[] {
+/**
+ * Timeline for the Live events tab.
+ *
+ * Two things worth knowing about the source:
+ *
+ *  - **Own goals are credited to the team that benefits**, not the team that
+ *    conceded: an own goal by a Rayo player carries Barcelona's team id.
+ *    Flipping it — which seems intuitive — puts the goal on the wrong side and
+ *    corrupts every running score after it.
+ *
+ *  - **Delays are emitted twice**, once per team, and the second copy has null
+ *    text and no participants. Rendered literally those become blank rows
+ *    carrying nothing but a minute.
+ */
+function normaliseEvents(
+  keyEvents: any[],
+  homeTeamId: string,
+  awayTeamId: string,
+  finalScore: { home: number | null; away: number | null },
+): MatchEvent[] {
   const running = { home: 0, away: 0 };
   const out: MatchEvent[] = [];
 
   for (const e of keyEvents) {
-    const rawType = String(e?.type?.type ?? '');
-    const type = EVENT_TYPE[rawType] ?? 'other';
+    const type = mapEventType(String(e?.type?.type ?? ''));
     const teamId = String(e?.team?.id ?? '');
     const side: MatchEvent['side'] =
       teamId && teamId === homeTeamId ? 'home'
       : teamId && teamId === awayTeamId ? 'away'
       : null;
 
-    const display = String(e?.clock?.displayValue ?? '');
-    const mm = display.match(/^(\d+)(?:\+(\d+))?/);
-
-    const isGoal = Boolean(e?.scoringPlay) || type === 'goal' || type === 'penalty' || type === 'own-goal';
-    if (isGoal && side) {
-      // Derive the post-event score by tallying, rather than parsing prose.
-      // Own goals credit the opposing side.
-      const credited = type === 'own-goal' ? (side === 'home' ? 'away' : 'home') : side;
-      running[credited] += 1;
-    }
-
     const participants: any[] = Array.isArray(e?.participants) ? e.participants : [];
+    const text = str(e?.text);
+
+    // Drop the noise copies: nothing to show and no period to mark.
+    if (type !== 'period' && participants.length === 0 && text === null) continue;
+    if (type === 'other' && participants.length === 0) continue;
+
+    const display = String(e?.clock?.displayValue ?? '');
+    const mm = display.match(/^(\d+)(?:'?\+(\d+))?/);
+
+    // `scoringPlay` is the feed's own authoritative flag — more reliable than
+    // inferring from the type string, which has many variants.
+    const isGoal = e?.scoringPlay === true;
+    if (isGoal && side) running[side] += 1;
 
     out.push({
       id: `espn:${e?.id ?? out.length}`,
@@ -434,9 +462,21 @@ function normaliseEvents(keyEvents: any[], homeTeamId: string, awayTeamId: strin
       side,
       playerName: str(participants[0]?.athlete?.displayName),
       playerOutName: type === 'substitution' ? str(participants[1]?.athlete?.displayName) : null,
-      text: str(e?.text),
+      text,
       score: isGoal ? { home: running.home, away: running.away } : null,
     });
+  }
+
+  // If the tally disagrees with the actual score we have missed or
+  // double-counted something. Showing no running score is better than showing
+  // a wrong one, so drop them rather than guess.
+  const expected = finalScore.home !== null && finalScore.away !== null;
+  if (expected && (running.home !== finalScore.home || running.away !== finalScore.away)) {
+    console.warn(
+      `[espn] event tally ${running.home}-${running.away} != score ` +
+      `${finalScore.home}-${finalScore.away}; suppressing per-event scores`,
+    );
+    for (const ev of out) ev.score = null;
   }
 
   // Newest first — the design shows the latest minute at the top.
@@ -607,7 +647,7 @@ export const espn: Source = {
     const awayRawId = String(comp.competitors?.find((c: any) => c.homeAway === 'away')?.team?.id ?? '');
 
     const keyEvents: any[] = Array.isArray(s?.keyEvents) ? s.keyEvents : [];
-    const events = normaliseEvents(keyEvents, homeRawId, awayRawId);
+    const events = normaliseEvents(keyEvents, homeRawId, awayRawId, match.score);
     const stats = normaliseStats(s?.boxscore);
 
     const rosters: any[] = Array.isArray(s?.rosters) ? s.rosters : [];
