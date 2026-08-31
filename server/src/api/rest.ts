@@ -109,6 +109,10 @@ export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
         const filter = url.searchParams.get('leagues');
         const wanted = filter ? new Set(filter.split(',').filter(Boolean)) : null;
 
+        // Any date the sweep has not reached is fetched now rather than
+        // answered with an empty list.
+        await sched.ensureDay(date, wanted ? [...wanted] : undefined);
+
         const groups = store
           .getDay(date)
           .filter(g => g.matches.length > 0)

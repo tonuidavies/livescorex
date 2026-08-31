@@ -10,8 +10,11 @@ import { MatchRow } from '../components/MatchRow';
 import { TopBar } from '../components/TopBar';
 import { SideBar } from '../components/SideBar';
 import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/StateViews';
+import { useNowTicker } from '../util/useMatchClock';
+import { useOnline } from '../util/useOnline';
 import type { TabScreenProps } from '../navigation/types';
 import type { Match } from '../api/types';
+import { SelectionBar } from '../components/SelectionBar';
 
 type Props = TabScreenProps<'Live'>;
 
@@ -27,11 +30,26 @@ export function LiveScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { prefs, isMatch, toggleMatch } = usePrefs();
   const [menu, setMenu] = useState(false);
-  const [onlyMine, setOnlyMine] = useState(true);
+  const [selecting, setSelecting] = useState(false);
+
+  /**
+   * Every competition by default.
+   *
+   * Live is a discovery surface: the point is seeing that something is on,
+   * including in leagues you have not thought to follow. Filtering it to
+   * followed leagues made the tab look empty on a busy evening. The LIVE pill
+   * narrows it to your leagues when you want that.
+   */
+  const [onlyMine, setOnlyMine] = useState(false);
 
   const leagues = onlyMine ? prefs.leagues : [];
-  const { groups, loading, refreshing, error, hasData, conn, reload } =
+  const online = useOnline();
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastLoadedAt } =
     useMatches({ mode: 'live', date: '', leagues });
+
+  // Live clocks are interpolated between server updates, so the list needs a
+  // heartbeat of its own to advance them.
+  const now = useNowTicker(groups.length > 0);
 
   const sections = useMemo(
     () => groups.map(g => ({ key: g.league.slug, league: g.league, data: g.matches })),
@@ -55,7 +73,17 @@ export function LiveScreen({ navigation }: Props) {
         connState={conn}
       />
 
-      {error && hasData ? <StaleBanner fetchedAt={Date.now()} offline={conn === 'offline'} /> : null}
+      {selecting ? (
+        <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />
+      ) : null}
+
+      {(!online || conn === 'offline' || (error && hasData)) ? (
+        <StaleBanner
+          fetchedAt={lastLoadedAt || Date.now()}
+          offline={!online}
+          disconnected={conn === 'offline'}
+        />
+      ) : null}
 
       {loading && !hasData ? (
         <View style={{ paddingTop: space.lg }}><RowSkeleton /></View>
@@ -83,6 +111,9 @@ export function LiveScreen({ navigation }: Props) {
               onToggleStar={() => toggleMatch(item.id)}
               onPress={() => openMatch(item)}
               showOdds={false}
+              now={now}
+              selecting={selecting}
+              onLongPress={() => setSelecting(true)}
             />
           )}
           ListEmptyComponent={
@@ -92,7 +123,7 @@ export function LiveScreen({ navigation }: Props) {
               subtitle={
                 onlyMine
                   ? 'No matches in progress in the leagues you follow. Tap LIVE to see every competition.'
-                  : 'No matches in progress anywhere. Check the Matches tab for what’s coming up.'
+                  : 'No matches in progress in any of the 259 competitions. Check Matches for what’s coming up.'
               }
             />
           }

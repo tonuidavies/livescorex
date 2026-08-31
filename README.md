@@ -76,6 +76,20 @@ The African leagues return scores and a league table only. The app handles this
 by building the detail tabs from `MatchDetail.available`, so a Kenyan fixture
 simply has no Statistics tab rather than an empty one.
 
+Some things are unavailable from ESPN **anywhere**, in any league:
+
+| Asked for | Status |
+|---|---|
+| Live player ratings | **Not available.** ESPN publishes counting stats (fouls, passes) but no rating. Sofascore and FotMob compute their own; there is nothing to normalise here. |
+| Coaches / managers | **Not available.** Absent from both the summary and the team resource. |
+| Injury lists | **Not available.** The per-team injuries endpoint returns an empty set for every soccer league checked. |
+| Stadium, referee, attendance | Available — shipped on the Info tab. |
+| Head to head | Available — last five meetings. |
+| Odds | Available — see below. |
+
+All three gaps are the same fix: a second adapter. FotMob has ratings, coaches
+and injuries; the `Source` interface exists to take it.
+
 **If depth on local content matters, that needs a second source.** api-football
 carries the Kenyan Premier League as league `276` and would fill the gap.
 The `Source` interface in `server/src/sources/types.ts` exists for exactly this:
@@ -86,7 +100,7 @@ return no fixtures at all. That is correct behaviour, not a bug — see below.
 
 ---
 
-## Four upstream quirks that will bite
+## Upstream quirks that will bite
 
 **1. `dates` is mandatory.** A bare scoreboard call falls back to the nearest
 fixture when a league is out of season, so `ken.1` happily returns a May
@@ -146,6 +160,24 @@ keep and one they uninstall:
    discarding it; the app renders it behind a staleness banner. No spinner is
    ever drawn over data we already have.
 
+### The match clock is interpolated, not polled
+
+The most common complaint about a scores app is that it trails a scout-fed
+service like Flashscore by about a minute. Most of that gap is not the
+pipeline — it is the clock granularity described above. Upstream publishes
+whole minutes that change roughly once a minute, so a received value is on
+average ~30s old before it leaves their servers.
+
+Polling faster cannot fix that, so the app does it on the display side: once a
+minute value has been held for 45 seconds it is more likely than not that the
+true minute has advanced, so tick once — and never more than once, so a genuine
+stall (VAR, an injury break) cannot run away. Any server update snaps straight
+back to the authoritative value.
+
+Live polling is still tight — 5s for tier 1, 12s for tier 2 — because that
+governs **goal** freshness, which is what people actually notice. The
+state-aware scheduler keeps the volume affordable regardless.
+
 ### Deltas, not refetches
 
 A goal on the wire is ~200 bytes. Refetching a scoreboard is ~200KB. On a
@@ -202,11 +234,14 @@ System / Light / Dark, and System is honoured.
 **No date strip on Live.** Live is always now, so the row would be inert. The
 space goes to the league filter, which is what people actually reach for.
 
-**Odds ship dark.** The Matches row renders odds and the schema carries them,
-but `ODDS_ENABLED` defaults to false. Displaying odds is generally fine;
-linking to a bookmaker or taking affiliate revenue makes this a gambling app
-under Google Play policy, which in Kenya means BCLB licensing, an 18+ rating
-and reduced AdMob demand. Flip the flag once that is settled — no code change.
+**Odds are behind a flag.** Fixture rows show three-way decimal odds when
+`ODDS_ENABLED=true`; they are hidden once a match is under way, since the
+source only quotes pre-match. The flag exists because displaying odds is
+generally fine, but linking to a bookmaker or taking affiliate revenue makes
+this a gambling app under Google Play policy — in Kenya that means BCLB
+licensing, an 18+ rating and reduced AdMob demand. Displaying only, as here, is
+the low-risk end of that; the flag means a store reviewer's objection is a
+config change rather than a release.
 
 **A league filter, which the wireframes did not have.** 259 competitions is
 thousands of rows on a Saturday. Users follow a set during onboarding (Kenya
@@ -298,6 +333,30 @@ The native module cannot run in Expo Go:
 ```bash
 cd app && npx expo run:android
 ```
+
+## Installing the APK on a phone
+
+```bash
+cd app
+EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8787 npx expo prebuild --platform android
+cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+```
+
+The APK lands in `app/android/app/build/outputs/apk/release/`. It is signed
+with the debug keystore — installable and self-contained, not for distribution.
+
+Transfer it to the phone and allow installation from unknown sources.
+
+**The phone must reach the server.** Run it bound to your LAN and keep the
+phone on the same Wi-Fi:
+
+```bash
+cd server && ODDS_ENABLED=true npm run dev
+```
+
+If your machine's address changes, there is no need to rebuild: **Settings →
+Server** takes a new address and tests it. That field exists precisely because
+re-cutting an APK for a DHCP lease change is a miserable way to test.
 
 ### Still to do: iOS Live Activity
 

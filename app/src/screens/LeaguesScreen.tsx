@@ -9,7 +9,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t, font } from '../theme';
 import { api } from '../api/client';
 import { usePrefs } from '../store/prefs';
-import { Crest } from '../components/Crest';
+import { LeagueCrest } from '../components/Crest';
 import { Star } from '../components/Star';
 import { ErrorState, Loading } from '../components/StateViews';
 import type { League } from '../api/types';
@@ -116,7 +116,7 @@ export function LeaguesScreen({ navigation }: Props) {
               style={[styles.row, { backgroundColor: colors.card }]}
               onPress={() => navigation.navigate('Table', { leagueSlug: item.slug })}
             >
-              <Crest uri={item.logo} name={item.countryName} size={26} />
+              <LeagueCrest league={item} size={26} />
               <View style={{ flex: 1 }}>
                 <Text style={[t.bodyMed, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
                 <Text style={[t.caption, { color: colors.textMuted }]} numberOfLines={1}>

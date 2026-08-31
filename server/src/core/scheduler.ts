@@ -215,6 +215,46 @@ export class Scheduler {
     };
   }
 
+  /**
+   * Fetch a day the sweep has not covered, on demand.
+   *
+   * The date strip offers three weeks; the daily sweep covers three days (a
+   * week for tier 1). Without this, scrolling to next Saturday showed an empty
+   * screen — the data was never wrong, it was simply never fetched.
+   *
+   * In-flight requests are shared so twenty clients opening the same date
+   * produce one upstream sweep, not twenty.
+   */
+  private dayFetches = new Map<string, Promise<void>>();
+
+  async ensureDay(day: string, slugs?: string[]): Promise<void> {
+    const wanted = slugs?.length ? slugs : LEAGUES.map(l => l.slug);
+    const missing = wanted.filter(slug => !store.getLeagueDay(day, slug));
+    if (missing.length === 0) return;
+
+    const key = `${day}:${missing.length === wanted.length ? 'all' : missing.join(',')}`;
+    const existing = this.dayFetches.get(key);
+    if (existing) return existing;
+
+    const job = (async () => {
+      const CONCURRENCY = 6;
+      let cursor = 0;
+      const worker = async () => {
+        while (cursor < missing.length) {
+          const slug = missing[cursor++];
+          if (!slug) break;
+          await this.fetchLeagueDay(slug, day);
+          await sleep(30);
+        }
+      };
+      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+      console.log(`[sched] on-demand fetch of ${missing.length} leagues for ${day}`);
+    })().finally(() => this.dayFetches.delete(key));
+
+    this.dayFetches.set(key, job);
+    return job;
+  }
+
   /** Exposed so the REST layer can lazily fill standings on first request. */
   async ensureStandings(slug: string): Promise<void> {
     const existing = store.getStandings(slug);

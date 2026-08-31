@@ -50,14 +50,36 @@ export function ErrorState({
   );
 }
 
-/** Sits above content that is real but no longer confirmed. */
-export function StaleBanner({ fetchedAt, offline }: { fetchedAt: number; offline?: boolean }) {
+/**
+ * Sits above content that is real but no longer confirmed.
+ *
+ * Being offline and having a dropped socket are different situations with
+ * different fixes, so the banner names the actual one rather than showing a
+ * single vague warning.
+ */
+export function StaleBanner({
+  fetchedAt, offline, disconnected,
+}: { fetchedAt: number; offline?: boolean; disconnected?: boolean }) {
   const { colors } = useTheme();
+  const tone = offline ? colors.redCard : colors.stale;
+  const message = offline
+    ? 'No internet connection'
+    : disconnected
+      ? 'Reconnecting to live updates'
+      : 'Live updates paused';
+
   return (
-    <View style={[styles.banner, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
-      <View style={[styles.dot, { backgroundColor: colors.stale }]} />
-      <Text style={[t.caption, { color: colors.textMuted }]}>
-        {offline ? 'Offline — showing saved scores' : 'Reconnecting'} · updated {agoLabel(fetchedAt)}
+    <View style={[styles.banner, { backgroundColor: colors.cardAlt, borderColor: tone }]}>
+      <Ionicons
+        name={offline ? 'cloud-offline' : 'sync'}
+        size={13}
+        color={tone}
+      />
+      <Text style={[t.caption, { color: colors.text }]} numberOfLines={1}>
+        {message}
+      </Text>
+      <Text style={[t.caption, { color: colors.textMuted, flex: 1, textAlign: 'right' }]} numberOfLines={1}>
+        Scores from {agoLabel(fetchedAt)}
       </Text>
     </View>
   );

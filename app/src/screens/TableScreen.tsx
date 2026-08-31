@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { space, type as t } from '../theme';
 import { api } from '../api/client';
 import { usePrefs } from '../store/prefs';
-import { Crest } from '../components/Crest';
+import { Crest, LeagueCrest } from '../components/Crest';
 import { Star } from '../components/Star';
 import { StandingsTable } from '../components/StandingsTable';
 import { EmptyState, ErrorState, Loading } from '../components/StateViews';
@@ -68,7 +68,9 @@ export function TableScreen({ route, navigation }: Props) {
           }
         >
           <View style={styles.crest}>
-            <Crest uri={league?.logo ?? null} name={league?.name ?? leagueSlug} size={92} />
+            {league
+              ? <LeagueCrest league={league} size={92} />
+              : <Crest uri={null} name={leagueSlug} size={92} />}
             <Text style={[t.h3, { color: colors.text, marginTop: space.md }]}>
               {league?.name ?? leagueSlug}
             </Text>

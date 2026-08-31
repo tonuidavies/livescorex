@@ -2,6 +2,7 @@ import React, {
   createContext, useCallback, useContext, useEffect, useMemo, useState,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setApiUrl } from '../api/client';
 
 export type ThemePref = 'system' | 'light' | 'dark';
 
@@ -19,6 +20,10 @@ export interface Prefs {
   /** Present only once the user opts into cross-device sync. Favourites work
    *  fully without it — see README on why auth is not a gate. */
   account: { id: string; name: string; email: string } | null;
+
+  /** Overrides the build-time API origin. Lets an installed APK follow a dev
+   *  machine to a new LAN address without a rebuild. */
+  apiUrl: string | null;
 }
 
 const DEFAULTS: Prefs = {
@@ -29,6 +34,7 @@ const DEFAULTS: Prefs = {
   teams: [],
   matches: [],
   account: null,
+  apiUrl: null,
 };
 
 const KEY = 'livescorex.prefs.v1';
@@ -57,7 +63,12 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(KEY);
-        if (!cancelled && raw) setPrefs({ ...DEFAULTS, ...(JSON.parse(raw) as Prefs) });
+        if (!cancelled && raw) {
+          const loaded = { ...DEFAULTS, ...(JSON.parse(raw) as Prefs) };
+          // Apply before the first render so no request goes to the default.
+          setApiUrl(loaded.apiUrl);
+          setPrefs(loaded);
+        }
       } catch {
         // Corrupt or unreadable prefs must not block the app — defaults are fine.
       } finally {
@@ -73,6 +84,7 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const set = useCallback((patch: Partial<Prefs>) => {
+    if ('apiUrl' in patch) setApiUrl(patch.apiUrl ?? null);
     setPrefs(prev => {
       const next = { ...prev, ...patch };
       void AsyncStorage.setItem(KEY, JSON.stringify(next)).catch(() => {});

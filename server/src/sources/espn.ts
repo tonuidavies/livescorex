@@ -1,6 +1,6 @@
 import type {
-  Match, MatchDetail, MatchEvent, MatchState, Odds, StandingRow, Standings,
-  Team, TeamLineup, LineupPlayer, TeamStat,
+  Match, MatchDetail, MatchEvent, MatchInfo, MatchState, Odds, StandingRow,
+  Standings, Team, TeamLineup, LineupPlayer, TeamStat,
 } from '../core/schema.js';
 import type { Source } from './types.js';
 import { getJson } from '../util/http.js';
@@ -57,18 +57,60 @@ function team(c: any): Team {
   };
 }
 
+/**
+ * American moneyline to decimal odds.
+ *
+ *   +600 -> 7.00   (600/100 + 1)
+ *   -215 -> 1.47   (100/215 + 1)
+ *
+ * ESPN quotes American because its betting partners are US sportsbooks;
+ * everywhere this app ships, decimal is what people read.
+ */
+function americanToDecimal(a: number): number | null {
+  if (!Number.isFinite(a) || a === 0) return null;
+  const dec = a > 0 ? a / 100 + 1 : 100 / Math.abs(a) + 1;
+  return Math.round(dec * 100) / 100;
+}
+
+/** "+600" / "-215" / "EVEN" -> number */
+function parseAmerican(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const t = String(v ?? '').trim();
+  if (t === '' ) return null;
+  if (/^even$/i.test(t)) return 100;
+  const n = Number(t.replace('+', ''));
+  return Number.isFinite(n) ? n : null;
+}
+
 function parseOdds(comp: any): Odds | null {
   if (!config.oddsEnabled) return null;
   const raw = Array.isArray(comp?.odds) ? comp.odds.find((o: any) => o) : null;
   if (!raw) return null;
-  const home = Number(raw?.homeTeamOdds?.moneyLine ?? raw?.homeTeamOdds?.value);
-  const away = Number(raw?.awayTeamOdds?.moneyLine ?? raw?.awayTeamOdds?.value);
-  const draw = Number(raw?.drawOdds?.moneyLine ?? raw?.drawOdds?.value);
-  if (!Number.isFinite(home) || !Number.isFinite(away)) return null;
+
+  // The scoreboard often carries only `drawOdds.moneyLine` while the nested
+  // `moneyline.{home,away}.close.odds` strings are populated, and the summary
+  // endpoint is the reverse. Read both shapes.
+  const pick = (side: 'home' | 'away' | 'draw'): number | null => {
+    if (side === 'draw') {
+      return parseAmerican(raw?.drawOdds?.moneyLine)
+        ?? parseAmerican(raw?.moneyline?.draw?.close?.odds)
+        ?? parseAmerican(raw?.moneyline?.draw?.open?.odds);
+    }
+    const key = side === 'home' ? 'homeTeamOdds' : 'awayTeamOdds';
+    return parseAmerican(raw?.[key]?.moneyLine)
+      ?? parseAmerican(raw?.moneyline?.[side]?.close?.odds)
+      ?? parseAmerican(raw?.moneyline?.[side]?.open?.odds);
+  };
+
+  const home = americanToDecimal(pick('home') ?? NaN);
+  const away = americanToDecimal(pick('away') ?? NaN);
+  if (home === null || away === null) return null;
+
+  const drawRaw = pick('draw');
   return {
     home,
     away,
-    draw: Number.isFinite(draw) ? draw : null,
+    draw: drawRaw === null ? null : americanToDecimal(drawRaw),
     provider: str(raw?.provider?.name),
   };
 }
@@ -84,13 +126,15 @@ function normaliseMatch(slug: string, ev: any): Match | null {
   const status = ev.status ?? comp.status ?? {};
   const state = mapState(status?.type);
   const kickoff = Date.parse(ev.date ?? comp.date ?? '');
+  const minute = state === 'live' ? parseMinute(status) : null;
 
   return {
     id: `espn:${ev.id}`,
     league: getLeague(slug),
     kickoff: Number.isFinite(kickoff) ? kickoff : 0,
     state,
-    minute: state === 'live' ? parseMinute(status) : null,
+    minute,
+    minuteAsOf: minute === null ? null : Date.now(),
     statusLabel: str(status?.type?.shortDetail) ?? str(status?.type?.detail) ?? '',
     home: team(homeC),
     away: team(awayC),
@@ -441,6 +485,71 @@ function normaliseStandingRows(entries: any[]): StandingRow[] {
   }).sort((a, b) => a.rank - b.rank);
 }
 
+/* -------------------------------------------------------------------- h2h */
+
+/**
+ * Previous meetings, from `seasonseries`.
+ *
+ * These entries are NOT scoreboard events: they have `competitors` directly on
+ * the object with no `competitions` wrapper, and `statusType` rather than
+ * `status`. Feeding them to `normaliseMatch` silently produced an empty list,
+ * which is why the Matches tab never appeared.
+ */
+function normaliseSeriesEvent(slug: string, e: any): Match | null {
+  const cs: any[] = Array.isArray(e?.competitors) ? e.competitors : [];
+  const homeC = cs.find(c => c?.homeAway === 'home') ?? cs[0];
+  const awayC = cs.find(c => c?.homeAway === 'away') ?? cs[1];
+  if (!homeC || !awayC) return null;
+
+  const type = e?.statusType ?? e?.status?.type ?? {};
+  const state = mapState(type);
+  const kickoff = Date.parse(e?.date ?? '');
+
+  return {
+    id: `espn:${e?.id ?? ''}`,
+    league: getLeague(slug),
+    kickoff: Number.isFinite(kickoff) ? kickoff : 0,
+    state,
+    minute: null,
+    minuteAsOf: null,
+    statusLabel: str(type?.shortDetail) ?? str(type?.detail) ?? 'FT',
+    home: team(homeC),
+    away: team(awayC),
+    score: { home: int(homeC.score), away: int(awayC.score) },
+    halftimeScore: null,
+    venue: null,
+    odds: null,
+    updatedAt: Date.now(),
+    source: 'espn',
+  };
+}
+
+/* ------------------------------------------------------------------- info */
+
+function normaliseInfo(gameInfo: any, comp: any): MatchInfo {
+  const officials: any[] = Array.isArray(gameInfo?.officials) ? gameInfo.officials : [];
+  const ref = officials.find(o =>
+    String(o?.position?.name ?? '').toLowerCase().includes('referee'));
+
+  const venue = gameInfo?.venue ?? comp?.venue ?? null;
+
+  return {
+    venue: str(venue?.fullName),
+    city: str(venue?.address?.city),
+    country: str(venue?.address?.country),
+    attendance: int(gameInfo?.attendance) || null,
+    referee: str(ref?.displayName) ?? str(ref?.fullName),
+    officials: officials
+      .filter(o => o !== ref)
+      .map(o => {
+        const name = str(o?.displayName) ?? str(o?.fullName);
+        const role = str(o?.position?.displayName);
+        return name ? (role ? `${name} (${role})` : name) : null;
+      })
+      .filter((x): x is string => x !== null),
+  };
+}
+
 /* ------------------------------------------------------------------ source */
 
 export const espn: Source = {
@@ -488,7 +597,9 @@ export const espn: Source = {
       id,
       date: comp.date,
       status: comp.status,
-      competitions: [comp],
+      // The summary's own `odds` block carries both moneylines, where the
+      // scoreboard often has only the draw.
+      competitions: [{ ...comp, odds: s?.odds ?? comp?.odds }],
     });
     if (!match) return null;
 
@@ -521,11 +632,17 @@ export const espn: Source = {
 
     const series: any[] = Array.isArray(s?.seasonseries?.[0]?.events) ? s.seasonseries[0].events : [];
     const headToHead: Match[] = series
-      .map((e: any) => normaliseMatch(slug, e))
-      .filter((m): m is Match => m !== null);
+      .map((e: any) => normaliseSeriesEvent(slug, e))
+      .filter((m): m is Match => m !== null)
+      .sort((a, b) => b.kickoff - a.kickoff);
+
+    const info = normaliseInfo(s?.gameInfo, comp);
+    const hasInfo =
+      info.venue !== null || info.referee !== null || info.attendance !== null;
 
     return {
       match,
+      info,
       events,
       stats,
       lineups,
@@ -536,6 +653,8 @@ export const espn: Source = {
         statistics: stats.length > 0,
         lineup: lineups !== null,
         standings: standings !== null,
+        headToHead: headToHead.length > 0,
+        info: hasInfo,
       },
     };
   },

@@ -6,15 +6,17 @@ import { useTheme } from '../theme/ThemeProvider';
 import { space, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { kickoffTime, longDate, statusCell } from '../util/format';
-import { Crest } from './Crest';
+import { Crest, LeagueCrest } from './Crest';
 import { Star } from './Star';
 
 /** The purple band at the top of the match-detail screen. */
 export function MatchHeader({
   match, onBack, starred, onToggleStar, onShare, homeStarred, awayStarred,
-  onToggleHome, onToggleAway,
+  onToggleHome, onToggleAway, now,
 }: {
   match: Match;
+  /** Drives the interpolated clock; pass a ticking value for live matches. */
+  now?: number;
   onBack: () => void;
   starred: boolean;
   onToggleStar: () => void;
@@ -26,7 +28,7 @@ export function MatchHeader({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const status = statusCell(match);
+  const status = statusCell(match, now ?? Date.now());
   const played = match.score.home !== null && match.score.away !== null;
   const live = match.state === 'live' || match.state === 'halftime';
 
@@ -38,7 +40,12 @@ export function MatchHeader({
         </Pressable>
 
         <View style={styles.titleCol}>
-          <Text style={[t.h3, { color: '#FFF' }]} numberOfLines={1}>{match.league.name}</Text>
+          <View style={styles.leagueRow}>
+            {match.league.logo || match.league.logoDark ? (
+              <LeagueCrest league={match.league} size={18} />
+            ) : null}
+            <Text style={[t.h3, { color: '#FFF' }]} numberOfLines={1}>{match.league.name}</Text>
+          </View>
           <Text style={[t.caption, { color: 'rgba(255,255,255,0.6)' }]} numberOfLines={1}>
             {longDate(match.kickoff)}
           </Text>
@@ -114,6 +121,7 @@ const styles = StyleSheet.create({
   wrap: { paddingHorizontal: space.md, paddingBottom: space.xl },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   titleCol: { flex: 1, alignItems: 'center' },
+  leagueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   scoreRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: space.lg },
   teamBlock: { flex: 1, alignItems: 'center', gap: space.sm },

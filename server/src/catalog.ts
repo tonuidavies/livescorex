@@ -7,6 +7,9 @@ interface RawLeague {
   listed: boolean;
   eventsAtProbe: number | null;
   tier: 1 | 2;
+  /** Both harvested by data/enrich-logos.mjs — see below. */
+  logo?: string | null;
+  logoDark?: string | null;
 }
 
 /**
@@ -54,7 +57,12 @@ export const LEAGUES: League[] = raw.map(r => {
     country,
     countryName: countryName(country),
     flag: null,
-    logo: `https://a.espncdn.com/i/leaguelogos/soccer/500/${r.slug}.png`,
+    // Not constructible: the logo path uses an internal image id (the Premier
+    // League is 23) unrelated to the league id (700) or the slug, so it is
+    // harvested into leagues.json by data/enrich-logos.mjs. 174 of 259
+    // competitions have one; the rest fall back to the country initial.
+    logo: r.logo ?? null,
+    logoDark: r.logoDark ?? null,
     tier: (forcedTier1.has(r.slug) ? 1 : r.tier) as 1 | 2,
   };
 });
@@ -70,6 +78,7 @@ export function getLeague(slug: string): League {
       countryName: countryName(slug.split('.')[0] ?? slug),
       flag: null,
       logo: null,
+      logoDark: null,
       tier: 2,
     }
   );

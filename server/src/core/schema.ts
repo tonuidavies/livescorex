@@ -32,6 +32,9 @@ export interface League {
   countryName: string;
   flag: string | null;
   logo: string | null;
+  /** Light-on-dark variant. Many competition marks are near-black artwork and
+   *  vanish on a dark background, so the app picks by theme. */
+  logoDark: string | null;
   tier: 1 | 2;
 }
 
@@ -107,6 +110,8 @@ export interface Standings {
 }
 
 /** Odds are optional and gated behind a feature flag — see config.oddsEnabled. */
+/** Decimal odds. Sources quote American moneylines; conversion happens in the
+ *  adapter so the app never sees a format question. */
 export interface Odds {
   home: number;
   draw: number | null;
@@ -122,6 +127,15 @@ export interface Match {
   state: MatchState;
   /** minute of play when live; null otherwise */
   minute: number | null;
+  /**
+   * When `minute` was observed, epoch ms.
+   *
+   * Sources publish the clock in whole-minute steps that only change about
+   * once a minute, so a displayed minute is up to ~60s stale however fast we
+   * poll. The client interpolates forward from this timestamp, which closes
+   * essentially all of the perceived lag.
+   */
+  minuteAsOf: number | null;
   /** short status label from the source, e.g. "FT", "HT", "76'" */
   statusLabel: string;
   home: Team;
@@ -137,8 +151,20 @@ export interface Match {
 }
 
 /** Everything the match-detail screen needs, fetched on demand. */
+/** Context shown above the timeline: where, who officiated, how many came. */
+export interface MatchInfo {
+  venue: string | null;
+  city: string | null;
+  country: string | null;
+  attendance: number | null;
+  referee: string | null;
+  /** Other named officials, when the source lists them. */
+  officials: string[];
+}
+
 export interface MatchDetail {
   match: Match;
+  info: MatchInfo;
   events: MatchEvent[];
   stats: TeamStat[];
   lineups: { home: TeamLineup; away: TeamLineup } | null;
@@ -151,6 +177,8 @@ export interface MatchDetail {
     statistics: boolean;
     lineup: boolean;
     standings: boolean;
+    headToHead: boolean;
+    info: boolean;
   };
 }
 

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
 import { space, type as t } from '../theme';
 import type { League } from '../api/types';
-import { Crest } from './Crest';
+import { LeagueCrest } from './Crest';
 
 /** Country + competition band above each group, tappable through to the table. */
 export function LeagueHeader({ league, onPress }: { league: League; onPress?: () => void }) {
@@ -17,7 +17,7 @@ export function LeagueHeader({ league, onPress }: { league: League; onPress?: ()
       accessibilityRole={onPress ? 'button' : 'header'}
       accessibilityLabel={`${league.countryName}, ${league.name}`}
     >
-      <Crest uri={league.logo} name={league.countryName} size={24} />
+      <LeagueCrest league={league} size={24} />
       <Text style={[t.h3, { color: colors.text }]} numberOfLines={1}>
         {league.countryName}
       </Text>

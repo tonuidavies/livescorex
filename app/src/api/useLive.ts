@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { WS_URL } from './client';
+import { getWsUrl } from './client';
 import type { Delta, DeltaFrame, LeagueGroup, Match } from './types';
 
 export type ConnState = 'connecting' | 'open' | 'offline';
@@ -55,7 +55,7 @@ export function useLiveSocket({ leagues, onResync, enabled = true }: Options) {
 
       let ws: WebSocket;
       try {
-        ws = new WebSocket(WS_URL);
+        ws = new WebSocket(getWsUrl());
       } catch {
         scheduleReconnect();
         return;

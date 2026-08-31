@@ -1,5 +1,8 @@
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text,
+  TextInput, View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,6 +10,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t } from '../theme';
 import { usePrefs, type ThemePref } from '../store/prefs';
 import { Segmented } from '../components/Segmented';
+import { DEFAULT_API_URL, normaliseApiUrl, pingServer } from '../api/client';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -15,6 +19,20 @@ export function SettingsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { prefs, set } = usePrefs();
+
+  const [server, setServer] = useState(prefs.apiUrl ?? DEFAULT_API_URL);
+  const [checking, setChecking] = useState(false);
+  const [reachable, setReachable] = useState<boolean | null>(null);
+
+  const applyServer = async () => {
+    setChecking(true);
+    const ok = await pingServer(server);
+    setReachable(ok);
+    setChecking(false);
+    // Save either way: the server may simply be down right now, and refusing
+    // to save a correct address because of that would be worse.
+    set({ apiUrl: normaliseApiUrl(server) === DEFAULT_API_URL ? null : normaliseApiUrl(server) });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
@@ -69,6 +87,66 @@ export function SettingsScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
+        <Text style={[t.label, styles.sectionLabel, { color: colors.textMuted }]}>SERVER</Text>
+        <View style={[styles.card, { backgroundColor: colors.card, padding: space.md }]}>
+          <TextInput
+            value={server}
+            onChangeText={txt => { setServer(txt); setReachable(null); }}
+            placeholder="http://192.168.1.20:8787"
+            placeholderTextColor={colors.textDim}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            style={[
+              t.body,
+              styles.input,
+              { color: colors.text, backgroundColor: colors.cardAlt, borderColor: colors.border },
+            ]}
+          />
+          <View style={styles.serverRow}>
+            <Text style={[t.caption, { color: colors.textMuted, flex: 1 }]}>
+              {reachable === null
+                ? 'Where this app fetches scores from'
+                : reachable
+                  ? 'Connected'
+                  : 'Could not reach that address'}
+            </Text>
+            <Pressable
+              onPress={applyServer}
+              disabled={checking}
+              hitSlop={8}
+              accessibilityRole="button"
+            >
+              {checking
+                ? <ActivityIndicator size="small" color={colors.accent} />
+                : (
+                  <Text style={[t.bodyMed, { color: colors.accent }]}>
+                    Test &amp; save
+                  </Text>
+                )}
+            </Pressable>
+          </View>
+          {reachable !== null ? (
+            <View
+              style={[
+                styles.pill,
+                { backgroundColor: reachable ? 'rgba(47,191,49,0.14)' : 'rgba(214,59,51,0.14)' },
+              ]}
+            >
+              <Text
+                style={[
+                  t.caption,
+                  { color: reachable ? colors.markerPromotion : colors.redCard },
+                ]}
+              >
+                {reachable
+                  ? 'Saved — pull to refresh on Matches'
+                  : 'Saved anyway. Check the server is running and the phone is on the same Wi-Fi.'}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
         <Text style={[t.caption, styles.footer, { color: colors.textDim }]}>
           LivescoreX v1.0.0
         </Text>
@@ -83,4 +161,12 @@ const styles = StyleSheet.create({
   card: { borderRadius: radius.md, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, minHeight: 58 },
   footer: { textAlign: 'center', marginTop: space.xxxl },
+  input: {
+    height: 46, borderRadius: radius.sm, paddingHorizontal: space.md,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  serverRow: {
+    flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.md,
+  },
+  pill: { marginTop: space.md, padding: space.sm, borderRadius: radius.sm },
 });

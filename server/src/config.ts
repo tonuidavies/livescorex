@@ -13,9 +13,17 @@ const num = (v: string | undefined, d: number) => {
 export const config = {
   port: num(process.env.PORT, 8787),
 
-  /** Poll cadence in seconds while a league has a match in progress. */
-  pollLiveTier1: num(process.env.POLL_LIVE_TIER1, 10),
-  pollLiveTier2: num(process.env.POLL_LIVE_TIER2, 30),
+  /**
+   * Poll cadence in seconds while a league has a match in progress.
+   *
+   * Upstream publishes the match clock in whole-minute steps that change only
+   * about once a minute, so polling faster than this buys nothing for the
+   * *minute* — the client interpolates that. It does buy goal freshness, which
+   * is what people actually notice, so these are deliberately tight and the
+   * state-aware scheduler keeps the volume affordable anyway.
+   */
+  pollLiveTier1: num(process.env.POLL_LIVE_TIER1, 5),
+  pollLiveTier2: num(process.env.POLL_LIVE_TIER2, 12),
 
   /** Local hour for the daily full-catalog fixture sweep. */
   sweepHour: num(process.env.SWEEP_HOUR, 4),

@@ -1,4 +1,5 @@
 import type { Match } from '../api/types';
+import { displayMinute } from './useMatchClock';
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
 
@@ -40,9 +41,16 @@ export function longDate(ms: number): string {
 export const isLive = (m: Match) => m.state === 'live' || m.state === 'halftime';
 export const isPlayed = (m: Match) => m.state === 'finished';
 
-/** What goes in the left-hand cell of a match row. */
-export function statusCell(m: Match): { text: string; tone: 'live' | 'muted' | 'normal' } {
-  if (m.state === 'live') return { text: m.minute !== null ? `${m.minute}'` : 'LIVE', tone: 'live' };
+/** What goes in the left-hand cell of a match row. `now` drives the
+ *  interpolated clock; pass Date.now() when you have no ticker. */
+export function statusCell(
+  m: Match,
+  now: number = Date.now(),
+): { text: string; tone: 'live' | 'muted' | 'normal' } {
+  if (m.state === 'live') {
+    const mm = displayMinute(m, now);
+    return { text: mm !== null ? `${mm}'` : 'LIVE', tone: 'live' };
+  }
   if (m.state === 'halftime') return { text: 'HT', tone: 'live' };
   if (m.state === 'finished') return { text: 'FT', tone: 'muted' };
   if (m.state === 'postponed') return { text: 'PP', tone: 'muted' };

@@ -14,6 +14,8 @@ import { StatsTable } from '../components/StatsTable';
 import { StandingsTable } from '../components/StandingsTable';
 import { Pitch } from '../components/Pitch';
 import { EmptyState, ErrorState, Loading } from '../components/StateViews';
+import { MatchInfoCard } from '../components/MatchInfo';
+import { useNowTicker } from '../util/useMatchClock';
 import { MatchRow } from '../components/MatchRow';
 import type { MatchDetail } from '../api/types';
 import type { RootStackParamList } from '../navigation/types';
@@ -42,6 +44,9 @@ export function MatchDetailScreen({ route, navigation }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<string>('summary');
+
+  // Interpolated clock in the header, same as the lists.
+  const now = useNowTicker(detail?.match.state === 'live');
 
   const load = useCallback(async (refresh = false) => {
     if (refresh) setRefreshing(true);
@@ -87,11 +92,18 @@ export function MatchDetailScreen({ route, navigation }: Props) {
     const a = detail?.available;
     const prematch = detail?.match.state === 'scheduled';
     return [
-      { key: 'summary', label: prematch ? 'Overview' : 'Summary', enabled: prematch ? Boolean(detail?.lineups) : a?.summary !== false },
+      {
+        key: 'summary',
+        // "Summary" undersold it: this tab is the running feed of goals,
+        // cards and substitutions as they happen.
+        label: prematch ? 'Preview' : 'Live events',
+        enabled: prematch ? Boolean(detail?.lineups) : a?.summary !== false,
+      },
       { key: 'statistics', label: 'Statistics', enabled: a?.statistics === true },
       { key: 'lineup', label: 'Lineup', enabled: a?.lineup === true },
-      { key: 'h2h', label: 'Matches', enabled: (detail?.headToHead.length ?? 0) > 0 },
+      { key: 'h2h', label: 'H2H', enabled: a?.headToHead === true },
       { key: 'standings', label: 'Standings', enabled: a?.standings === true },
+      { key: 'info', label: 'Info', enabled: a?.info === true },
     ];
   }, [detail]);
 
@@ -116,6 +128,7 @@ export function MatchDetailScreen({ route, navigation }: Props) {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <MatchHeader
         match={m}
+        now={now}
         onBack={() => navigation.goBack()}
         starred={isMatch(m.id)}
         onToggleStar={() => toggleMatch(m.id)}
@@ -161,10 +174,12 @@ export function MatchDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
+        {tab === 'info' && <MatchInfoCard info={detail.info} />}
+
         {tab === 'h2h' && (
           <View style={{ paddingTop: space.lg }}>
             <Text style={[t.label, { color: colors.textMuted, paddingHorizontal: space.md, paddingBottom: space.sm }]}>
-              PREVIOUS MEETINGS
+              LAST {detail.headToHead.length} MEETINGS
             </Text>
             {detail.headToHead.map(h => (
               <MatchRow

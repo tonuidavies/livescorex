@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as LiveMatch from '../../modules/live-match-notification';
 import { usePrefs } from '../store/prefs';
-import { API_URL } from '../api/client';
+import { getApiUrl } from '../api/client';
 import { handleMessage } from './matchNotifications';
 import { registerBackgroundTask, unregisterBackgroundTask } from './backgroundTask';
 
@@ -67,7 +67,7 @@ export function useNotifications() {
         if (registeredToken.current === signature) return;
         registeredToken.current = signature;
 
-        await fetch(`${API_URL}/v1/devices`, {
+        await fetch(`${getApiUrl()}/v1/devices`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

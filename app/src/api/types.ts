@@ -8,7 +8,11 @@ export interface Team { id: string; name: string; shortName: string; crest: stri
 
 export interface League {
   slug: string; name: string; country: string; countryName: string;
-  flag: string | null; logo: string | null; tier: 1 | 2;
+  flag: string | null;
+  logo: string | null;
+  /** Light-on-dark variant for dark themes. */
+  logoDark: string | null;
+  tier: 1 | 2;
 }
 
 export interface MatchEvent {
@@ -48,21 +52,37 @@ export interface Odds { home: number; draw: number | null; away: number; provide
 
 export interface Match {
   id: string; league: League; kickoff: number; state: MatchState;
-  minute: number | null; statusLabel: string;
+  minute: number | null;
+  /** When `minute` was observed — see useMatchClock for why this matters. */
+  minuteAsOf: number | null;
+  statusLabel: string;
   home: Team; away: Team;
   score: { home: number | null; away: number | null };
   halftimeScore: { home: number; away: number } | null;
   venue: string | null; odds: Odds | null; updatedAt: number; source: string;
 }
 
+export interface MatchInfo {
+  venue: string | null;
+  city: string | null;
+  country: string | null;
+  attendance: number | null;
+  referee: string | null;
+  officials: string[];
+}
+
 export interface MatchDetail {
   match: Match;
+  info: MatchInfo;
   events: MatchEvent[];
   stats: TeamStat[];
   lineups: { home: TeamLineup; away: TeamLineup } | null;
   standings: Standings | null;
   headToHead: Match[];
-  available: { summary: boolean; statistics: boolean; lineup: boolean; standings: boolean };
+  available: {
+    summary: boolean; statistics: boolean; lineup: boolean;
+    standings: boolean; headToHead: boolean; info: boolean;
+  };
 }
 
 export interface LeagueGroup {

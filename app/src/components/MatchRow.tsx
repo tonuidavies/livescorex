@@ -16,16 +16,21 @@ import { Star } from './Star';
  * so this is one component with a variant rather than two that drift apart.
  */
 export const MatchRow = memo(function MatchRow({
-  match, starred, onToggleStar, onPress, showOdds,
+  match, starred, onToggleStar, onPress, showOdds, now, selecting, onLongPress,
 }: {
   match: Match;
   starred: boolean;
   onToggleStar: () => void;
   onPress: () => void;
   showOdds: boolean;
+  /** Drives the interpolated clock. Pass a ticking value for live lists. */
+  now?: number;
+  /** In selection mode the whole row toggles the star instead of opening. */
+  selecting?: boolean;
+  onLongPress?: () => void;
 }) {
   const { colors } = useTheme();
-  const status = statusCell(match);
+  const status = statusCell(match, now ?? Date.now());
   const live = status.tone === 'live';
   const played = match.score.home !== null && match.score.away !== null;
 
@@ -38,10 +43,16 @@ export const MatchRow = memo(function MatchRow({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={selecting ? onToggleStar : onPress}
+      onLongPress={onLongPress}
+      delayLongPress={280}
       style={({ pressed }) => [
         styles.row,
-        { backgroundColor: pressed ? colors.cardAlt : colors.card },
+        {
+          backgroundColor: pressed ? colors.cardAlt : colors.card,
+          borderColor: selecting && starred ? colors.accent : 'transparent',
+          borderWidth: selecting ? 1 : 0,
+        },
       ]}
       accessibilityRole="button"
       accessibilityLabel={
@@ -84,11 +95,14 @@ export const MatchRow = memo(function MatchRow({
           <ScoreDigit value={match.score.home ?? 0} live={live} />
           <ScoreDigit value={match.score.away ?? 0} live={live} />
         </View>
-      ) : (
-        <View style={styles.starWrap}>
-          <Star on={starred} onToggle={onToggleStar} />
-        </View>
-      )}
+      ) : null}
+
+      {/* Every match is starrable. Previously the score occupied this slot, so
+          a live or finished match could not be favourited at all — which is
+          exactly the moment people want to follow one. */}
+      <View style={styles.starWrap}>
+        <Star on={starred} onToggle={onToggleStar} size={17} hitSlop={14} />
+      </View>
     </Pressable>
   );
 });
@@ -161,7 +175,7 @@ const styles = StyleSheet.create({
   },
   teams: { flex: 1, justifyContent: 'center', paddingVertical: space.sm, paddingLeft: space.md, gap: 6 },
   teamLine: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  scores: { width: 40, justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: space.sm },
+  scores: { width: 34, justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: space.sm },
   odds: { justifyContent: 'center', alignItems: 'flex-end', gap: 2, paddingRight: space.sm },
-  starWrap: { justifyContent: 'center', paddingRight: space.md, paddingLeft: space.xs },
+  starWrap: { justifyContent: 'center', paddingRight: space.sm, paddingLeft: 2 },
 });

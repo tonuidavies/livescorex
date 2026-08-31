@@ -9,7 +9,7 @@ import { radius, space, type as t, font } from '../theme';
 import { api } from '../api/client';
 import { usePrefs } from '../store/prefs';
 import { Button } from '../components/Button';
-import { Crest } from '../components/Crest';
+import { LeagueCrest } from '../components/Crest';
 import { Star } from '../components/Star';
 import type { League } from '../api/types';
 import type { RootStackParamList } from '../navigation/types';
@@ -111,7 +111,7 @@ export function OnboardingScreen({ navigation }: Props) {
             onPress={() => toggleLeague(l.slug)}
             style={[styles.row, { backgroundColor: colors.card }]}
           >
-            <Crest uri={l.logo} name={l.countryName} size={30} />
+            <LeagueCrest league={l} size={30} />
             <View style={{ flex: 1 }}>
               <Text style={[t.bodyMed, { color: colors.text }]} numberOfLines={1}>{l.name}</Text>
               <Text style={[t.caption, { color: colors.textMuted }]}>{l.countryName}</Text>

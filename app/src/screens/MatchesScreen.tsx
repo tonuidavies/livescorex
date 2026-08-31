@@ -12,6 +12,9 @@ import { MatchRow } from '../components/MatchRow';
 import { TopBar } from '../components/TopBar';
 import { SideBar } from '../components/SideBar';
 import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/StateViews';
+import { SelectionBar } from '../components/SelectionBar';
+import { useNowTicker } from '../util/useMatchClock';
+import { useOnline } from '../util/useOnline';
 import type { TabScreenProps } from '../navigation/types';
 import type { Match } from '../api/types';
 
@@ -31,10 +34,15 @@ export function MatchesScreen({ navigation }: Props) {
 
   const [date, setDate] = useState(() => dayKeyUTC(new Date()));
   const [menu, setMenu] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const online = useOnline();
 
   const leagues = prefs.leagues;
-  const { groups, loading, refreshing, error, hasData, conn, reload } =
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastLoadedAt } =
     useMatches({ mode: 'day', date, leagues });
+
+  const anyLive = groups.some(g => g.matches.some(m => m.state === 'live'));
+  const now = useNowTicker(anyLive);
 
   const sections = useMemo(
     () => groups.map(g => ({ key: g.league.slug, league: g.league, stale: g.stale, fetchedAt: g.fetchedAt, data: g.matches })),
@@ -63,8 +71,16 @@ export function MatchesScreen({ navigation }: Props) {
 
       <DateStrip selected={date} onSelect={setDate} />
 
-      {(anyStale || (error && hasData)) ? (
-        <StaleBanner fetchedAt={oldestFetch} offline={conn === 'offline'} />
+      {selecting ? (
+        <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />
+      ) : null}
+
+      {(!online || anyStale || conn === 'offline' || (error && hasData)) ? (
+        <StaleBanner
+          fetchedAt={oldestFetch || lastLoadedAt || Date.now()}
+          offline={!online}
+          disconnected={conn === 'offline'}
+        />
       ) : null}
 
       {loading && !hasData ? (
@@ -93,6 +109,9 @@ export function MatchesScreen({ navigation }: Props) {
               onToggleStar={() => toggleMatch(item.id)}
               onPress={() => openMatch(item)}
               showOdds
+              now={now}
+              selecting={selecting}
+              onLongPress={() => setSelecting(true)}
             />
           )}
           ListEmptyComponent={
@@ -105,7 +124,7 @@ export function MatchesScreen({ navigation }: Props) {
             ) : (
               <EmptyState
                 title="No matches on this day"
-                subtitle="Try another date, or follow more leagues from the menu."
+                subtitle={`Nothing scheduled in your ${leagues.length} leagues. Try another date, or follow more from the menu.`}
               />
             )
           }

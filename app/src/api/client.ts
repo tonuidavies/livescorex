@@ -4,16 +4,53 @@ import type {
 } from './types';
 
 /**
- * On a physical Android device `localhost` is the phone, not your Mac. Set
- * EXPO_PUBLIC_API_URL to your machine's LAN address (e.g. http://192.168.1.20:8787)
- * or the deployed origin.
+ * Where the API lives.
+ *
+ * On a physical device `localhost` is the phone, not your machine, so the
+ * build-time default comes from EXPO_PUBLIC_API_URL. It is also overridable at
+ * runtime from Settings: an installed APK otherwise has to be rebuilt every
+ * time the dev machine's LAN address changes, which makes testing on a real
+ * phone far more painful than it needs to be.
  */
-export const API_URL: string =
+export const DEFAULT_API_URL: string =
   process.env.EXPO_PUBLIC_API_URL ??
   (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl ??
   'http://localhost:8787';
 
-export const WS_URL = API_URL.replace(/^http/, 'ws') + '/v1/stream';
+let currentApiUrl = DEFAULT_API_URL;
+
+/** Normalise so a user typing "192.168.1.5:8787" still works. */
+export function normaliseApiUrl(raw: string): string {
+  const trimmed = raw.trim().replace(/\/+$/, '');
+  if (trimmed === '') return DEFAULT_API_URL;
+  return /^https?:\/\//.test(trimmed) ? trimmed : `http://${trimmed}`;
+}
+
+export function setApiUrl(url: string | null): void {
+  currentApiUrl = url ? normaliseApiUrl(url) : DEFAULT_API_URL;
+}
+
+export function getApiUrl(): string {
+  return currentApiUrl;
+}
+
+export function getWsUrl(): string {
+  return currentApiUrl.replace(/^http/, 'ws') + '/v1/stream';
+}
+
+/** Quick reachability probe for the Settings screen. */
+export async function pingServer(url: string, timeoutMs = 6000): Promise<boolean> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${normaliseApiUrl(url)}/health`, { signal: ctrl.signal });
+    return res.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) {
@@ -26,7 +63,7 @@ async function get<T>(path: string, timeoutMs = 12_000): Promise<T> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await fetch(`${getApiUrl()}${path}`, {
       signal: ctrl.signal,
       headers: { Accept: 'application/json' },
     });

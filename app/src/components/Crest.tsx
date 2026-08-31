@@ -60,6 +60,25 @@ export function Crest({
   );
 }
 
+/**
+ * Competition crest that respects the theme.
+ *
+ * Many league marks are near-black artwork on transparency — the Premier
+ * League lion is the obvious one — and disappear against a dark background,
+ * so the dark variant is preferred whenever the theme is dark and one exists.
+ */
+export function LeagueCrest({
+  league, size = 24, style,
+}: {
+  league: { logo: string | null; logoDark: string | null; countryName: string };
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { name } = useTheme();
+  const uri = name === 'dark' ? (league.logoDark ?? league.logo) : (league.logo ?? league.logoDark);
+  return <Crest uri={uri} name={league.countryName} size={size} style={style} />;
+}
+
 const styles = StyleSheet.create({
   fallback: { alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth },
 });
