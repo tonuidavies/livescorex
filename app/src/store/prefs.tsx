@@ -24,6 +24,10 @@ export interface Prefs {
   /** Overrides the build-time API origin. Lets an installed APK follow a dev
    *  machine to a new LAN address without a rebuild. */
   apiUrl: string | null;
+
+  /** Whether the starter set of leagues has ever been applied. Separate from
+   *  `onboarded` so that clearing your leagues on purpose is respected. */
+  seeded: boolean;
 }
 
 const DEFAULTS: Prefs = {
@@ -35,6 +39,7 @@ const DEFAULTS: Prefs = {
   matches: [],
   account: null,
   apiUrl: null,
+  seeded: false,
 };
 
 const KEY = 'livescorex.prefs.v1';

@@ -120,6 +120,8 @@ export function MatchesScreen({ navigation }: Props) {
                 icon="funnel-outline"
                 title="No leagues followed yet"
                 subtitle="Pick the competitions you care about and they'll show up here."
+                actionLabel="Browse leagues"
+                onAction={() => navigation.navigate('Leagues')}
               />
             ) : (
               <EmptyState

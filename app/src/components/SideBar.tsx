@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Modal, Pressable, StyleSheet, Text, View, useWindowDimensions,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
 import { space, type as t, font } from '../theme';

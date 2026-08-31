@@ -336,6 +336,22 @@ cd app && npx expo run:android
 
 ## Installing the APK on a phone
 
+Fastest route with a device attached (USB or wireless ADB):
+
+```bash
+cd app/android
+EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8787 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+**Android blocks cleartext HTTP from API 28**, and a release build has no
+`usesCleartextTraffic` attribute at all — so an APK pointed at an `http://`
+dev server fails every request *silently*, which looks exactly like a broken
+app. `plugins/withCleartextTraffic.js` sets it. That is a development
+affordance: production should terminate TLS and the plugin should come out.
+
+Or build both ABIs for a phone you cannot plug in:
+
 ```bash
 cd app
 EXPO_PUBLIC_API_URL=http://<your-lan-ip>:8787 npx expo prebuild --platform android

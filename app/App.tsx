@@ -10,6 +10,7 @@ import { PrefsProvider } from './src/store/prefs';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import { Navigation } from './src/navigation';
 import { useNotifications } from './src/notifications/useNotifications';
+import { useSeedLeagues } from './src/store/useSeedLeagues';
 
 function Shell() {
   const { colors, name } = useTheme();
@@ -18,6 +19,7 @@ function Shell() {
     void SystemUI.setBackgroundColorAsync(colors.bg).catch(() => {});
   }, [colors.bg]);
 
+  useSeedLeagues();
   useNotifications();
 
   return (

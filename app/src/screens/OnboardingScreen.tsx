@@ -39,8 +39,8 @@ export function OnboardingScreen({ navigation }: Props) {
       .then(r => {
         setLeagues(r.leagues);
         setDefaults(r.defaults);
-        // Pre-tick a sensible local starting set so page two is never empty.
-        if (prefs.leagues.length === 0) set({ leagues: r.defaults });
+        // Seeding happens at the app root (useSeedLeagues) so that routes
+        // which skip onboarding still get a starter set.
       })
       .catch(() => { /* offline first run: the picker just starts empty */ });
   }, []);   // eslint-disable-line react-hooks/exhaustive-deps

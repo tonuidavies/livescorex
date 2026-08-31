@@ -3,7 +3,7 @@ import {
   ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text,
   TextInput, View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeProvider';
@@ -11,6 +11,7 @@ import { radius, space, type as t } from '../theme';
 import { usePrefs, type ThemePref } from '../store/prefs';
 import { Segmented } from '../components/Segmented';
 import { DEFAULT_API_URL, normaliseApiUrl, pingServer } from '../api/client';
+import * as LiveMatch from '../../modules/live-match-notification';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -60,6 +61,31 @@ export function SettingsScreen({ navigation }: Props) {
               trackColor={{ true: colors.accent, false: colors.cardAlt }}
               thumbColor="#FFF"
             />
+          </View>
+        </View>
+
+        {/* Why alerts are or are not working. A scores app that silently fails
+            to notify is indistinguishable from one that has nothing to say, so
+            the state is stated plainly rather than left to be inferred. */}
+        <View style={[styles.card, { backgroundColor: colors.card, marginTop: space.sm }]}>
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={[t.bodyMed, { color: colors.text }]}>Live match notifications</Text>
+              <Text style={[t.caption, { color: colors.textMuted, marginTop: 2 }]}>
+                {!LiveMatch.isAvailable
+                  ? 'Unavailable in this build'
+                  : LiveMatch.supportsLiveUpdates
+                    ? `Live Updates supported (Android API ${LiveMatch.androidApiLevel})`
+                    : `Ongoing notification (Android API ${LiveMatch.androidApiLevel})`}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => { void LiveMatch.ensureChannel(); }}
+              hitSlop={8}
+              accessibilityRole="button"
+            >
+              <Text style={[t.caption, { color: colors.accent }]}>Set up</Text>
+            </Pressable>
           </View>
         </View>
 

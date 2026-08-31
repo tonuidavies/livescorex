@@ -6,7 +6,9 @@ import {
 import * as Linking from 'expo-linking';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTheme } from '../theme/ThemeProvider';
 import { font } from '../theme';
 import { usePrefs } from '../store/prefs';
@@ -45,6 +47,10 @@ function TabBarLabel({ label, focused }: { label: string; focused: boolean }) {
 
 function Tabs() {
   const { colors } = useTheme();
+  // Android 16 makes edge-to-edge mandatory, so the tab bar sits under the
+  // system navigation bar unless it reserves the inset itself. Without this
+  // the labels are clipped by Samsung's gesture pill.
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -53,8 +59,9 @@ function Tabs() {
           backgroundColor: colors.chrome,
           borderTopColor: colors.divider,
           borderTopWidth: StyleSheet.hairlineWidth,
-          height: 62,
+          height: 62 + insets.bottom,
           paddingTop: 6,
+          paddingBottom: insets.bottom,
         },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,

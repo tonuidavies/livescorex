@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t } from '../theme';
 import { agoLabel } from '../util/format';
@@ -14,8 +14,15 @@ import { agoLabel } from '../util/format';
  */
 
 export function EmptyState({
-  icon = 'calendar-outline', title, subtitle,
-}: { icon?: keyof typeof Ionicons.glyphMap; title: string; subtitle?: string }) {
+  icon = 'calendar-outline', title, subtitle, actionLabel, onAction,
+}: {
+  icon?: keyof typeof Ionicons.glyphMap;
+  title: string;
+  subtitle?: string;
+  /** An empty state that names a cause should offer the fix. */
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
   const { colors } = useTheme();
   return (
     <View style={styles.center}>
@@ -23,6 +30,15 @@ export function EmptyState({
       <Text style={[t.h3, { color: colors.text, marginTop: space.lg }]}>{title}</Text>
       {subtitle ? (
         <Text style={[t.body, styles.sub, { color: colors.textMuted }]}>{subtitle}</Text>
+      ) : null}
+      {actionLabel && onAction ? (
+        <Text
+          onPress={onAction}
+          style={[t.bodyMed, { color: colors.accent, marginTop: space.lg }]}
+          accessibilityRole="button"
+        >
+          {actionLabel}
+        </Text>
       ) : null}
     </View>
   );

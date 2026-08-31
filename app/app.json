@@ -35,7 +35,8 @@
         {
           "color": "#C94038"
         }
-      ]
+      ],
+      "./plugins/withCleartextTraffic"
     ],
     "extra": {
       "apiUrl": "http://192.168.100.20:8787"
