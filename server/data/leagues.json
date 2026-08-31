@@ -1,0 +1,1815 @@
+[
+ {
+  "slug": "arg.1",
+  "name": "Argentine Liga Profesional de F\u00fatbol",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 1
+ },
+ {
+  "slug": "bra.1",
+  "name": "Brazilian Serie A",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "caf.champions",
+  "name": "CAF Champions League",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 1
+ },
+ {
+  "slug": "caf.confed",
+  "name": "CAF Confederation Cup",
+  "listed": true,
+  "eventsAtProbe": 6,
+  "tier": 1
+ },
+ {
+  "slug": "caf.nations",
+  "name": "Africa Cup of Nations",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "eng.1",
+  "name": "English Premier League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "eng.2",
+  "name": "English League Championship",
+  "listed": true,
+  "eventsAtProbe": 8,
+  "tier": 1
+ },
+ {
+  "slug": "eng.fa",
+  "name": "English FA Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "eng.league_cup",
+  "name": "English Carabao Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "esp.1",
+  "name": "Spanish LALIGA",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "esp.copa_del_rey",
+  "name": "Spanish Copa del Rey",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "fifa.worldq.caf",
+  "name": "FIFA World Cup Qualifying - CAF",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "fra.1",
+  "name": "French Ligue 1",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "ger.1",
+  "name": "German Bundesliga",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "gha.1",
+  "name": "Ghanaian Premier League",
+  "listed": false,
+  "eventsAtProbe": 9,
+  "tier": 1
+ },
+ {
+  "slug": "ita.1",
+  "name": "Italian Serie A",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "ken.1",
+  "name": "Kenyan Premier League",
+  "listed": false,
+  "eventsAtProbe": 9,
+  "tier": 1
+ },
+ {
+  "slug": "ksa.1",
+  "name": "Saudi Pro League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 1
+ },
+ {
+  "slug": "ned.1",
+  "name": "Dutch Eredivisie",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 1
+ },
+ {
+  "slug": "nga.1",
+  "name": "Nigerian Professional League",
+  "listed": false,
+  "eventsAtProbe": 10,
+  "tier": 1
+ },
+ {
+  "slug": "por.1",
+  "name": "Portuguese Primeira Liga",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "rsa.1",
+  "name": "South African Premiership",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "tur.1",
+  "name": "Turkish Super Lig",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "uefa.champions",
+  "name": "UEFA Champions League",
+  "listed": true,
+  "eventsAtProbe": 6,
+  "tier": 1
+ },
+ {
+  "slug": "uefa.europa",
+  "name": "UEFA Europa League",
+  "listed": true,
+  "eventsAtProbe": 9,
+  "tier": 1
+ },
+ {
+  "slug": "uefa.europa.conf",
+  "name": "UEFA Conference League",
+  "listed": true,
+  "eventsAtProbe": 18,
+  "tier": 1
+ },
+ {
+  "slug": "uga.1",
+  "name": "Ugandan Premier League",
+  "listed": false,
+  "eventsAtProbe": 7,
+  "tier": 1
+ },
+ {
+  "slug": "usa.1",
+  "name": "MLS",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 1
+ },
+ {
+  "slug": "zam.1",
+  "name": "Zambian Super League",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 1
+ },
+ {
+  "slug": "zim.1",
+  "name": "Zimbabwean Premier Soccer League",
+  "listed": false,
+  "eventsAtProbe": 4,
+  "tier": 1
+ },
+ {
+  "slug": "afc.asian.cup",
+  "name": "AFC Asian Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "afc.champions",
+  "name": "AFC Champions League Elite",
+  "listed": true,
+  "eventsAtProbe": 6,
+  "tier": 2
+ },
+ {
+  "slug": "afc.champions_qual",
+  "name": "AFC Champions League Elite Qualifying",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "afc.cup",
+  "name": "AFC Champions League Two",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "afc.cup_qual",
+  "name": "AFC Champions League Two Qualifying",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "afc.cupq",
+  "name": "AFC Asian Cup Qualifiers",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "afc.saff.championship",
+  "name": "SAFF Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "afc.w.asian.cup",
+  "name": "AFC Women's Asian Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "aff.championship",
+  "name": "ASEAN Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.2",
+  "name": "Argentine Nacional B",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "arg.3",
+  "name": "Argentine Primera B",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.copa",
+  "name": "Copa Argentina",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.copa_de_la_superliga",
+  "name": "Argentine Copa de la Superliga",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.supercopa",
+  "name": "Argentine Supercopa",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.supercopa.internacional",
+  "name": "Argentine Supercopa Internacional",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "arg.trofeo_de_la_campeones",
+  "name": "Argentine Trofeo de Campeones",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "aus.1",
+  "name": "Australian A-League Men",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "aus.w.1",
+  "name": "Australian A-League Women",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "aut.1",
+  "name": "Austrian Bundesliga",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "aut.2",
+  "name": "Austrian Division I",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "bel.1",
+  "name": "Belgian Pro League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bel.promotion.relegation",
+  "name": "Belgian Pro League Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bol.1",
+  "name": "Bolivian Liga Profesional",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "bol.copa",
+  "name": "Copa Bolivia",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "bol.ply.rel",
+  "name": "Bolivian Liga Profesional Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.2",
+  "name": "Brazilian Serie B",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.3",
+  "name": "Brazilian Serie C",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.camp.carioca",
+  "name": "Brazilian Campeonato Carioca",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "bra.camp.gaucho",
+  "name": "Brazilian Campeonato Gaucho",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.camp.mineiro",
+  "name": "Brazilian Campeonato Mineiro",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.camp.paulista",
+  "name": "Brazilian Campeonato Paulista",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.copa_do_brazil",
+  "name": "Copa do Brasil",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "bra.supercopa_do_brazil",
+  "name": "Brazilian Supercopa Rei",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "caf.championship",
+  "name": "African Nations Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "caf.cosafa",
+  "name": "COSAFA Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "caf.nations_qual",
+  "name": "Africa Cup of Nations Qualifying",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "caf.w.nations",
+  "name": "Women's Africa Cup of Nations",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "campeones.cup",
+  "name": "Campeones Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "can.w.nsl",
+  "name": "Northern Super League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "chi.1",
+  "name": "Chilean Primera Divisi\u00f3n",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "chi.1.promotion.relegation",
+  "name": "Chilean Primera Divisi\u00f3n Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "chi.2",
+  "name": "Segunda Divisi\u00f3n de Chile",
+  "listed": false,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "chi.copa_chi",
+  "name": "Copa Chile",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "chi.super_cup",
+  "name": "Chilean Supercopa",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "chn.1",
+  "name": "Chinese Super League",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "chn.1.promotion.relegation",
+  "name": "Chinese Super League Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "club.friendly",
+  "name": "Club Friendly",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "col.1",
+  "name": "Colombian Primera A",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "col.2",
+  "name": "Colombian Primera B",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "col.copa",
+  "name": "Copa Colombia",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "col.superliga",
+  "name": "Colombian Superliga",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.central.american.cup",
+  "name": "Concacaf Central American Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.champions",
+  "name": "Concacaf Champions Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.champions_cup",
+  "name": "CONCACAF Champions Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.confederations_playoff",
+  "name": "Concacaf Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.gold",
+  "name": "Concacaf Gold Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.gold_qual",
+  "name": "Concacaf Gold Cup Qualifying",
+  "listed": true,
+  "eventsAtProbe": 7,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.leagues.cup",
+  "name": "Leagues Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.nations.league",
+  "name": "Concacaf Nations League",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.u23",
+  "name": "CONCACAF U23 Tournament",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.w.champions_cup",
+  "name": "Concacaf W Champions Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.w.gold",
+  "name": "Concacaf W Gold Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "concacaf.womens.championship",
+  "name": "Concacaf W Championship",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "conmebol.america",
+  "name": "Copa Am\u00e9rica",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "conmebol.america.femenina",
+  "name": "Copa Am\u00e9rica Femenina",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "conmebol.libertadores",
+  "name": "CONMEBOL Libertadores",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "conmebol.recopa",
+  "name": "CONMEBOL Recopa",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "conmebol.sudamericana",
+  "name": "CONMEBOL Sudamericana",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "crc.1",
+  "name": "Costa Rican Primera Division",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "cyp.1",
+  "name": "Cypriot First Division",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "cze.1",
+  "name": "Gambrinus Liga",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "den.1",
+  "name": "Danish Superliga",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "den.2",
+  "name": "Danish  1. Division",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "den.3",
+  "name": "Danish  2. Division",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "ecu.1",
+  "name": "LigaPro Ecuador",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "ecu.2",
+  "name": "Ecuador Serie B",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.3",
+  "name": "English League One",
+  "listed": true,
+  "eventsAtProbe": 7,
+  "tier": 2
+ },
+ {
+  "slug": "eng.4",
+  "name": "English League Two",
+  "listed": true,
+  "eventsAtProbe": 12,
+  "tier": 2
+ },
+ {
+  "slug": "eng.5",
+  "name": "English National League",
+  "listed": true,
+  "eventsAtProbe": 11,
+  "tier": 2
+ },
+ {
+  "slug": "eng.charity",
+  "name": "English FA Community Shield",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.fa_qual",
+  "name": "English FA Cup Qualifying",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "eng.trophy",
+  "name": "English EFL Trophy",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.w.1",
+  "name": "English Women's Super League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.w.fa",
+  "name": "English Women's FA Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.w.league_cup",
+  "name": "English Women's League Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "eng.w.promotion.relegation",
+  "name": "English Women's Super League Promotion/Relegation Playoff",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "esp.2",
+  "name": "Spanish LALIGA 2",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "esp.copa_de_la_reina",
+  "name": "Spanish Copa de la Reina",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "esp.joan_gamper",
+  "name": "Trofeo Joan Gamper",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "esp.super_cup",
+  "name": "Spanish Supercopa",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "esp.w.1",
+  "name": "Spanish Liga F",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.concacaf.olympicsq",
+  "name": "Men's Olympic Qualifying Playoff",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.conmebol.olympicsq",
+  "name": "CONMEBOL Pre-Olympic Tournament",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.cwc",
+  "name": "FIFA Club World Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.friendly",
+  "name": "International Friendly",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.friendly.w",
+  "name": "Women's International Friendly",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.friendly_u21",
+  "name": "Under-21 International Friendly",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.intercontinental.cup",
+  "name": "Intercontinental Cup (India)",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.intercontinental_cup",
+  "name": "FIFA Intercontinental Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.olympics",
+  "name": "Men's Olympic Soccer Tournament",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.shebelieves",
+  "name": "SheBelieves Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.w.champions_cup",
+  "name": "FIFA Women's Champions Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.w.concacaf.olympicsq",
+  "name": "Concacaf Women's Olympic Qualifying",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.w.olympics",
+  "name": "Women's Olympic Soccer Tournament",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.wcq.ply",
+  "name": "FIFA World Cup Qualifying - Playoff Tournament",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.world",
+  "name": "FIFA World Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.world.u17",
+  "name": "FIFA Under-17 World Cup",
+  "listed": true,
+  "eventsAtProbe": 8,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.world.u20",
+  "name": "FIFA Under-20 World Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.worldq.afc",
+  "name": "FIFA World Cup Qualifying - AFC",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.worldq.concacaf",
+  "name": "FIFA World Cup Qualifying - Concacaf",
+  "listed": true,
+  "eventsAtProbe": 6,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.worldq.conmebol",
+  "name": "FIFA World Cup Qualifying - CONMEBOL",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.worldq.ofc",
+  "name": "FIFA World Cup Qualifying - OFC",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.worldq.uefa",
+  "name": "FIFA World Cup Qualifying - UEFA",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.wwc",
+  "name": "FIFA Women's World Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.wwcq.ply",
+  "name": "FIFA Women's World Cup Qualifying - Playoff Tournament",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.wworld.u17",
+  "name": "FIFA Under-17 Women's World Cup",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "fifa.wworldq.uefa",
+  "name": "FIFA Women's World Cup Qualifying - UEFA",
+  "listed": true,
+  "eventsAtProbe": 16,
+  "tier": 2
+ },
+ {
+  "slug": "fin.1",
+  "name": "Finnish Veikkausliga",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "fin.2",
+  "name": "Finnish 1. Division",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "fra.1.promotion.relegation",
+  "name": "French Ligue 1 Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fra.2",
+  "name": "French Ligue 2",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fra.coupe_de_france",
+  "name": "Coupe de France",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fra.super_cup",
+  "name": "French Trophee des Champions",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "fra.w.1",
+  "name": "French Premi\u00e8re Ligue",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "friendly.emirates_cup",
+  "name": "Emirates Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ger.2",
+  "name": "German 2. Bundesliga",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "ger.2.promotion.relegation",
+  "name": "German Bundesliga 2. Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ger.dfb_pokal",
+  "name": "German Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ger.playoff.relegation",
+  "name": "German Bundesliga Promotion/Relegation Playoff",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ger.super_cup",
+  "name": "German Supercup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "global.arnold.clark_cup",
+  "name": "Arnold Clark Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "global.club_challenge",
+  "name": "CONMEBOL-UEFA Club Challenge",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "global.finalissima",
+  "name": "CONMEBOL-UEFA Cup of Champions",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "global.gulf_cup",
+  "name": "Arabian Gulf Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "global.pinatar_cup",
+  "name": "Pinatar Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "global.u20.intercontinental_cup",
+  "name": "CONMEBOL-UEFA U20 Intercontinental Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "global.w.finalissima",
+  "name": "CONMEBOL-UEFA Women's Cup of Champions",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "gre.1",
+  "name": "Greek Super League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "gua.1",
+  "name": "Guatemalan Liga Nacional",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "hon.1",
+  "name": "Honduran Liga Nacional",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "idn.1",
+  "name": "Indonesian Super League",
+  "listed": false,
+  "eventsAtProbe": 7,
+  "tier": 2
+ },
+ {
+  "slug": "ind.1",
+  "name": "Indian Super League",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "ind.2",
+  "name": "Indian I-League",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "irl.1",
+  "name": "Irish Premier Division",
+  "listed": false,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "isr.1",
+  "name": "Israeli Premier League",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "ita.2",
+  "name": "Italian Serie B",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "ita.3",
+  "name": "Italian Serie C1-A",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "ita.coppa_italia",
+  "name": "Coppa Italia",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "ita.super_cup",
+  "name": "Italian Supercoppa",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "jam.1",
+  "name": "Jamaican Premier League",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "jpn.1",
+  "name": "Japanese J.League",
+  "listed": true,
+  "eventsAtProbe": 10,
+  "tier": 2
+ },
+ {
+  "slug": "jpn.world_challenge",
+  "name": "Japanese J.League World Challenge",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ksa.kings.cup",
+  "name": "Saudi King's Cup",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "mex.1",
+  "name": "Mexican Liga BBVA MX",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "mex.2",
+  "name": "Mexican Liga de Expansi\u00f3n MX",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "mex.campeon",
+  "name": "Mexican Campeon de Campeones",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "mlt.1",
+  "name": "Maltese Premier League",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ned.2",
+  "name": "Dutch Keuken Kampioen Divisie",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "ned.3",
+  "name": "Dutch Tweede Divisie",
+  "listed": false,
+  "eventsAtProbe": 9,
+  "tier": 2
+ },
+ {
+  "slug": "ned.3.promotion.relegation",
+  "name": "Dutch Tweede Divisie Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ned.cup",
+  "name": "Dutch KNVB Beker",
+  "listed": true,
+  "eventsAtProbe": 12,
+  "tier": 2
+ },
+ {
+  "slug": "ned.playoff.relegation",
+  "name": "Dutch Eredivisie Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ned.supercup",
+  "name": "Dutch Johan Cruyff Shield",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "ned.w.1",
+  "name": "Dutch Vrouwen Eredivisie",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "ned.w.knvb_cup",
+  "name": "Dutch KNVB Beker Vrouwen",
+  "listed": true,
+  "eventsAtProbe": 15,
+  "tier": 2
+ },
+ {
+  "slug": "nir.1",
+  "name": "Northern Irish Premiership",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "nonfifa",
+  "name": "Non-FIFA Friendly",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "nor.1",
+  "name": "Norwegian Eliteserien",
+  "listed": true,
+  "eventsAtProbe": 8,
+  "tier": 2
+ },
+ {
+  "slug": "nor.1.promotion.relegation",
+  "name": "Norwegian Eliteserien Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "nor.2",
+  "name": "Norwegian 1. Division",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "nor.3",
+  "name": "Norwegian 2. Division",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "par.1",
+  "name": "Paraguayan Primera Divisi\u00f3n",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "par.1.supercopa",
+  "name": "Paraguayan Supercopa",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "par.2",
+  "name": "Segunda Divisi\u00f3n de Paraguay",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "per.1",
+  "name": "Peruvian Liga 1",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "per.2",
+  "name": "Segunda Divisi\u00f3n de Per\u00fa",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "por.1.promotion.relegation",
+  "name": "Portuguese Primeira Liga Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "por.taca.portugal",
+  "name": "Taca de Portugal",
+  "listed": true,
+  "eventsAtProbe": 37,
+  "tier": 2
+ },
+ {
+  "slug": "rou.1",
+  "name": "Romanian Liga 1",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "rsa.2",
+  "name": "South African First Division",
+  "listed": false,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "rus.1",
+  "name": "Russian Premier League",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "rus.1.promotion.relegation",
+  "name": "Russian Premier League Relegation/Promotion Playoffs",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "sco.1",
+  "name": "Scottish Premiership",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "sco.1.promotion.relegation",
+  "name": "Scottish Premiership Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "sco.2",
+  "name": "Scottish Championship",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "sco.2.promotion.relegation",
+  "name": "Scottish Championship Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "sco.challenge",
+  "name": "Scottish League Challenge Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "sco.cis",
+  "name": "Scottish League Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "sco.tennents",
+  "name": "Scottish Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "sco.tennents_qual",
+  "name": "Scottish Cup Qualifying",
+  "listed": true,
+  "eventsAtProbe": 19,
+  "tier": 2
+ },
+ {
+  "slug": "slv.1",
+  "name": "Salvadoran Primera Division",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "sui.1",
+  "name": "Swiss Super League",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "sui.2",
+  "name": "Swiss Challenge League",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "swe.1",
+  "name": "Swedish Allsvenskan",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "swe.1.promotion.relegation",
+  "name": "Swedish Allsvenskan Promotion/Relegation Playoffs",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "swe.2",
+  "name": "Swedish SuperEttan",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "tha.1",
+  "name": "Thai League 1",
+  "listed": false,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "tur.2",
+  "name": "Turkish 1. Ligi",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.champions_qual",
+  "name": "UEFA Champions League Qualifying",
+  "listed": true,
+  "eventsAtProbe": 4,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.euro",
+  "name": "UEFA European Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.euro.u19",
+  "name": "UEFA European Under-19 Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.euro_u21",
+  "name": "UEFA European Under-21 Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.euro_u21_qual",
+  "name": "UEFA European Under-21 Championship Qualifying",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.europa.conf_qual",
+  "name": "UEFA Conference League Qualifying",
+  "listed": true,
+  "eventsAtProbe": 23,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.europa_qual",
+  "name": "UEFA Europa League Qualifying",
+  "listed": true,
+  "eventsAtProbe": 12,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.euroq",
+  "name": "UEFA European Championship Qualifying",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.nations",
+  "name": "UEFA Nations League",
+  "listed": true,
+  "eventsAtProbe": 8,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.super_cup",
+  "name": "UEFA Super Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.w.europa",
+  "name": "UEFA Women's Europa Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.w.nations",
+  "name": "UEFA Women's Nations League",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.wchampions",
+  "name": "UEFA Women's Champions League",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.wchampions_qual",
+  "name": "UEFA Women's Champions League Qualifying",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uefa.weuro",
+  "name": "UEFA Women's European Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uru.1",
+  "name": "Liga AUF Uruguaya",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "uru.2",
+  "name": "Segunda Divisi\u00f3n de Uruguay",
+  "listed": true,
+  "eventsAtProbe": 6,
+  "tier": 2
+ },
+ {
+  "slug": "usa.ncaa.m.1",
+  "name": "NCAA Men's Soccer",
+  "listed": true,
+  "eventsAtProbe": 26,
+  "tier": 2
+ },
+ {
+  "slug": "usa.ncaa.w.1",
+  "name": "NCAA Women's Soccer",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "usa.nwsl",
+  "name": "NWSL",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "usa.nwsl.cup",
+  "name": "NWSL Challenge Cup",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "usa.open",
+  "name": "U.S. Open Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "usa.usl.1",
+  "name": "USL Championship",
+  "listed": true,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "usa.usl.l1",
+  "name": "USL League One",
+  "listed": true,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "usa.usl.l1.cup",
+  "name": "USL Cup",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "usa.w.1",
+  "name": "USA Women's United Soccer Association",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "usa.w.usl.1",
+  "name": "USL Super League",
+  "listed": true,
+  "eventsAtProbe": 3,
+  "tier": 2
+ },
+ {
+  "slug": "ven.1",
+  "name": "Venezuelan Primera Divisi\u00f3n",
+  "listed": true,
+  "eventsAtProbe": 2,
+  "tier": 2
+ },
+ {
+  "slug": "ven.2",
+  "name": "Segunda Divisi\u00f3n de Venezuela",
+  "listed": false,
+  "eventsAtProbe": 5,
+  "tier": 2
+ },
+ {
+  "slug": "wal.1",
+  "name": "Welsh Premier League",
+  "listed": false,
+  "eventsAtProbe": 1,
+  "tier": 2
+ },
+ {
+  "slug": "wal.cup",
+  "name": "League Of Wales Cup",
+  "listed": false,
+  "eventsAtProbe": 0,
+  "tier": 2
+ }
+]

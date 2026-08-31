@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.expo/
+.env
+snapshot.json
+devices.json
+*.log
+.DS_Store

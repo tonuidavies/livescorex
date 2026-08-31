@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "LivescoreX",
+    "slug": "livescorex",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "livescorex",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "backgroundColor": "#1C1B20",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1C1B20"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.livescorex.mobile"
+    },
+    "android": {
+      "package": "app.livescorex.mobile",
+      "adaptiveIcon": { "backgroundColor": "#1C1B20" },
+      "edgeToEdgeEnabled": true,
+      "permissions": ["POST_NOTIFICATIONS"]
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#C94038"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:8787"
+    }
+  }
+}
