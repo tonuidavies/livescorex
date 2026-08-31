@@ -2,7 +2,9 @@ node_modules/
 dist/
 .expo/
 .env
-snapshot.json
-devices.json
 *.log
 .DS_Store
+
+# Regenerable server state — every byte is re-derivable from upstream
+server/snapshot.json
+server/devices.json
