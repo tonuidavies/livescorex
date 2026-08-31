@@ -1,0 +1,5 @@
+<resources>
+  <color name="lsx_text">#FFFFFFFF</color>
+  <color name="lsx_text_muted">#FF8E8D94</color>
+  <color name="lsx_accent">#FFC94038</color>
+</resources>
