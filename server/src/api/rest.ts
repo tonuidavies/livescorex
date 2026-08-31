@@ -33,10 +33,31 @@ function json(res: ServerResponse, code: number, body: unknown, cacheSeconds = 0
   res.end(payload);
 }
 
-export function createRestHandler(sched: Scheduler) {
+interface NotifierLike {
+  health(): unknown;
+  simulate(matchId: string, kind?: 'goal' | 'kickoff' | 'halftime' | 'fulltime' | 'update'):
+    Promise<{ sent: number; match: string } | null>;
+}
+
+export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     if (req.method === 'POST') {
       const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+      /* Development helper: fire a real notification for a real match without
+       * waiting for an actual goal. Off unless DEBUG_PUSH=true. */
+      if (url.pathname === '/v1/debug/push') {
+        if (process.env.DEBUG_PUSH !== 'true') {
+          return json(res, 404, { error: 'not found' });
+        }
+        const body = await readBody(req);
+        const matchId = String(body?.matchId ?? '');
+        const kind = String(body?.kind ?? 'goal') as 'goal';
+        if (!matchId) return json(res, 400, { error: 'matchId required' });
+        const out = await notifier?.simulate(matchId, kind);
+        if (!out) return json(res, 404, { error: 'unknown match', matchId });
+        return json(res, 200, { ok: true, ...out, kind });
+      }
+
       if (url.pathname === '/v1/devices') {
         const body = await readBody(req);
         if (!body?.token) return json(res, 400, { error: 'token required' });
@@ -67,7 +88,8 @@ export function createRestHandler(sched: Scheduler) {
     try {
       if (p === '/health' || p === '/v1/health') {
         return json(res, 200, {
-          ok: true, uptime: process.uptime(), devices: devices.count(), ...sched.health(),
+          ok: true, uptime: process.uptime(), devices: devices.count(),
+          push: notifier?.health() ?? null, ...sched.health(),
         });
       }
 
@@ -138,7 +160,9 @@ export function createRestHandler(sched: Scheduler) {
       if (detail?.[1]) {
         const id = decodeURIComponent(detail[1]);
         const known = store.getMatch(id);
-        const slug = url.searchParams.get('league') ?? known?.league.slug;
+        // `||` not `??`: a deep link from a notification sends `league=` empty,
+        // and an empty string must fall through to the known match's league.
+        const slug = url.searchParams.get('league') || known?.league.slug;
         if (!slug) return json(res, 404, { error: 'unknown match' });
         const d = await sched.fetchDetail(slug, id);
         if (!d) return json(res, 503, { error: 'detail unavailable', match: known ?? null });

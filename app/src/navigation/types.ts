@@ -12,7 +12,9 @@ export type TabParamList = {
 export type RootStackParamList = {
   Onboarding: undefined;
   Tabs: NavigatorScreenParams<TabParamList> | undefined;
-  MatchDetail: { matchId: string; leagueSlug: string };
+  /** `leagueSlug` is optional because a notification deep link carries only
+   *  the match id; the detail screen resolves the league from the server. */
+  MatchDetail: { matchId: string; leagueSlug?: string };
   Table: { leagueSlug: string };
   Leagues: undefined;
   Search: undefined;

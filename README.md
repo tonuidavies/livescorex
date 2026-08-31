@@ -86,7 +86,7 @@ return no fixtures at all. That is correct behaviour, not a bug — see below.
 
 ---
 
-## Two upstream quirks that will bite
+## Four upstream quirks that will bite
 
 **1. `dates` is mandatory.** A bare scoreboard call falls back to the nearest
 fixture when a league is out of season, so `ken.1` happily returns a May
@@ -220,28 +220,92 @@ formation grid.
 
 ---
 
-## Notification roadmap
+## Notifications
 
-Implemented: permission, Android channel, device-token registration. The server
-sends **FCM data messages**, not notification messages, so the app renders the
-notification itself — that is what lets a score update a notification in place
-instead of stacking one per goal.
+Implemented end to end for Android, and the reason is simple: the market is
+~95% Android, so a Live Update in the shade is worth more than anything else
+that could be built next.
 
-Not implemented; both need native code, in priority order for an
-Android-majority market:
+### How it works
 
-1. **Android ongoing Live Update** — custom `RemoteViews` with crests and score,
-   `setOngoing(true)` and `setOnlyAlertOnce(true)` so stat changes update
-   silently. On API 36+ this becomes `Notification.ProgressStyle` and gets
-   promoted to the status-bar chip. Highest value, do this first.
-2. **iOS Live Activity / Dynamic Island** — a SwiftUI Widget Extension added via
-   `expo-apple-targets`, updated by APNs pushes with
-   `apns-push-type: liveactivity`.
+The server sends FCM **data** messages, never notification messages. Nothing is
+rendered until the app renders it — which is precisely what allows one
+notification per match, mutated as the score changes, instead of a new
+notification stacking up on every goal.
 
-Send direct to APNs and FCM rather than through Expo Push: it removes a hop and
-Expo cannot carry Live Activity payloads.
+```
+score/state delta  →  Notifier (coalesce 2s, throttle, rank)
+                   →  FCM v1 data message, collapse_key = matchId
+                   →  background task or foreground listener
+                   →  native module posts/updates notification id = hash(matchId)
+```
 
----
+**On API 36+** the notification uses the platform `Notification.ProgressStyle`
+— an Android Live Update. The match clock drives the progress bar, the two
+halves are segments, **goals are points along the bar**, and the score becomes
+the short critical text in the status-bar chip. This is the closest Android
+equivalent of an iOS Live Activity.
+
+**On API 24–35** it falls back to custom `RemoteViews`: crests, team names,
+score and minute, `setOngoing(true)` and `setOnlyAlertOnce(true)`.
+
+### What is and is not worth a push
+
+A minute tick is not news. Goals, kickoff, half time and full time are.
+
+- Goals and period changes go at FCM priority `high` and alert.
+- Everything else updates the already-visible notification **silently**, and is
+  capped at one per match per device per minute. Without that cap a 90-minute
+  match would push ~90 times per viewer to change a number nobody is watching.
+- `collapse_key` is the match id, so an undelivered older update is replaced
+  rather than queued behind.
+- Deltas are coalesced over 2s, because a goal usually arrives as a score delta
+  and a state delta in the same tick.
+- Full time dismisses the notification after five minutes. A dead fixture
+  pinned to the shade forever is the most common complaint about ongoing
+  notifications.
+- FCM reporting a dead token prunes it from the registry.
+
+### Setup
+
+Push runs in dry-run mode — logging what it would send — until credentials
+exist, so everything else works untouched in development.
+
+1. Create a Firebase project, add an Android app with package
+   `app.livescorex.mobile`, download `google-services.json` into `app/`.
+2. Download a service-account key and point the server at it:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json npm run dev
+```
+
+Testing without waiting for a real goal — you cannot make Arsenal score:
+
+```bash
+DEBUG_PUSH=true npm run dev
+curl -X POST localhost:8787/v1/debug/push \
+  -H 'Content-Type: application/json' \
+  -d '{"matchId":"espn:401879295","kind":"goal"}'
+```
+
+This drives the same code path as a live delta, so what appears on the device
+is exactly what a real goal produces.
+
+### Requires a development build
+
+The native module cannot run in Expo Go:
+
+```bash
+cd app && npx expo run:android
+```
+
+### Still to do: iOS Live Activity
+
+A SwiftUI Widget Extension added via `expo-apple-targets`, updated by APNs
+pushes with `apns-push-type: liveactivity` against the per-activity token. The
+server already sends the matching `apns` block on every message, so the work is
+entirely on the client side. Deliberately last — on this market it reaches a
+small minority of users.
 
 ## Production shape
 

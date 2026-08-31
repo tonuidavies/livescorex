@@ -12,16 +12,21 @@
       "resizeMode": "contain",
       "backgroundColor": "#1C1B20"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.livescorex.mobile"
     },
     "android": {
       "package": "app.livescorex.mobile",
-      "adaptiveIcon": { "backgroundColor": "#1C1B20" },
-      "edgeToEdgeEnabled": true,
-      "permissions": ["POST_NOTIFICATIONS"]
+      "adaptiveIcon": {
+        "backgroundColor": "#1C1B20"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       "expo-font",

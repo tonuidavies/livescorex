@@ -1,64 +1,52 @@
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import * as LiveMatch from '../../modules/live-match-notification';
 import { usePrefs } from '../store/prefs';
 import { API_URL } from '../api/client';
+import { handleMessage } from './matchNotifications';
+import { registerBackgroundTask, unregisterBackgroundTask } from './backgroundTask';
 
 /**
- * Notification setup.
+ * Notification lifecycle.
  *
- * Scope of what is here: permission, the Android channel, and registering the
- * device token with the server. The server sends **FCM data messages**, not
- * notification messages, so the app renders the notification itself — that is
- * what allows a score to update a notification in place rather than stacking a
- * new one on every goal.
+ * The server sends FCM **data** messages, not notification messages, so
+ * nothing is rendered until this code renders it. That is deliberate: it is
+ * the only way to update one notification in place as a match unfolds rather
+ * than stacking a new one on every goal.
  *
- * Two things deliberately not here, both requiring native code:
- *
- *   1. Android ongoing "Live Update" notification — a custom RemoteViews layout
- *      with crests and the score, `setOngoing(true)` and `setOnlyAlertOnce(true)`
- *      so stat changes update silently. On API 36+ this becomes
- *      `Notification.ProgressStyle` and gets promoted to the status-bar chip.
- *      Needs a small native module; this is the highest-value notification work
- *      for an Android-first market.
- *
- *   2. iOS Live Activity / Dynamic Island — a SwiftUI Widget Extension, added
- *      through `expo-apple-targets`, updated by APNs pushes with
- *      `apns-push-type: liveactivity`.
- *
- * See README "Notification roadmap".
+ * The native rendering lives in `modules/live-match-notification`.
+ * iOS still needs a Live Activity Widget Extension — see README.
  */
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,   // a goal alert that buzzes every minute gets muted
+    // Our own ongoing notification is the presentation. Letting the default
+    // handler also draw a banner would show the same goal twice.
+    shouldShowBanner: false,
+    shouldShowList: false,
+    shouldPlaySound: false,
     shouldSetBadge: false,
   }),
 });
 
 export function useNotifications() {
   const { prefs } = usePrefs();
-  const registered = useRef<string | null>(null);
+  const registeredToken = useRef<string | null>(null);
 
+  /* ---------------------------------------------- permission + token ---- */
   useEffect(() => {
-    if (!prefs.notifications) return;
+    if (!prefs.notifications) {
+      void unregisterBackgroundTask();
+      void LiveMatch.dismissAll().catch(() => {});
+      return;
+    }
+
     let cancelled = false;
 
     (async () => {
       try {
-        if (Platform.OS === 'android') {
-          // A dedicated channel so users can silence match alerts without
-          // silencing the app entirely.
-          await Notifications.setNotificationChannelAsync('match-updates', {
-            name: 'Match updates',
-            importance: Notifications.AndroidImportance.HIGH,
-            lightColor: '#C94038',
-            vibrationPattern: [0, 200],
-            showBadge: false,
-          });
-        }
+        await LiveMatch.ensureChannel();
 
         const existing = await Notifications.getPermissionsAsync();
         let status = existing.status;
@@ -67,12 +55,18 @@ export function useNotifications() {
         }
         if (status !== 'granted' || cancelled) return;
 
-        const token = (await Notifications.getDevicePushTokenAsync()).data;
-        if (cancelled || registered.current === token) return;
-        registered.current = token;
+        await registerBackgroundTask();
 
-        // Registration is best-effort: alerts are a bonus, and a failure here
-        // must never surface as an error in a scores app.
+        const token = (await Notifications.getDevicePushTokenAsync()).data;
+        if (cancelled || typeof token !== 'string') return;
+
+        // Re-register whenever the subscription set changes, not just on a new
+        // token — the server fans out by team and league, so a stale list means
+        // alerts for teams the user just unfollowed.
+        const signature = `${token}|${prefs.teams.join(',')}|${prefs.leagues.join(',')}`;
+        if (registeredToken.current === signature) return;
+        registeredToken.current = signature;
+
         await fetch(`${API_URL}/v1/devices`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -84,10 +78,23 @@ export function useNotifications() {
           }),
         }).catch(() => {});
       } catch {
-        // Simulators and permission-less environments land here. Ignore.
+        // Simulators, Expo Go, and permission-less environments land here.
       }
     })();
 
     return () => { cancelled = true; };
   }, [prefs.notifications, prefs.teams, prefs.leagues]);
+
+  /* ------------------------------------------------- foreground messages */
+  useEffect(() => {
+    if (!prefs.notifications) return;
+
+    // Foreground data messages do not go through the background task, so the
+    // same handler is wired to the received listener as well.
+    const sub = Notifications.addNotificationReceivedListener(notification => {
+      void handleMessage(notification.request.content.data).catch(() => {});
+    });
+
+    return () => sub.remove();
+  }, [prefs.notifications]);
 }

@@ -1,6 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
+import {
+  NavigationContainer, DarkTheme, DefaultTheme, type LinkingOptions,
+} from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -93,6 +96,33 @@ function Tabs() {
   );
 }
 
+/**
+ * Deep links. Tapping a live-match notification opens that match directly —
+ * `livescorex://match/espn:401879295`. Without this the notification would
+ * just cold-start the app on the fixture list, which is the single most
+ * annoying thing a score notification can do.
+ */
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [Linking.createURL('/'), 'livescorex://'],
+  config: {
+    screens: {
+      MatchDetail: {
+        path: 'match/:matchId',
+        parse: { matchId: decodeURIComponent },
+      },
+      Table: { path: 'league/:leagueSlug' },
+      Tabs: {
+        screens: {
+          Matches: 'matches',
+          Live: 'live',
+          Favourites: 'favourites',
+          Profile: 'profile',
+        },
+      },
+    },
+  },
+};
+
 export function Navigation() {
   const { colors, name } = useTheme();
   const { prefs, ready } = usePrefs();
@@ -112,7 +142,7 @@ export function Navigation() {
   if (!ready) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer theme={navTheme} linking={linking}>
       <Stack.Navigator
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}
         initialRouteName={prefs.onboarded ? 'Tabs' : 'Onboarding'}

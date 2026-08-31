@@ -28,7 +28,11 @@ type Props = NativeStackScreenProps<RootStackParamList, 'MatchDetail'>;
  * events simply has no Summary tab, instead of a tab that opens onto nothing.
  */
 export function MatchDetailScreen({ route, navigation }: Props) {
-  const { matchId, leagueSlug } = route.params;
+  const { matchId } = route.params;
+  // A deep link from a notification carries only the match id. The server can
+  // resolve the league from a match it already knows, so an absent slug is a
+  // normal case rather than an error.
+  const leagueSlug = route.params.leagueSlug ?? '';
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { isMatch, toggleMatch, isTeam, toggleTeam } = usePrefs();
