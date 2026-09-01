@@ -1,4 +1,5 @@
 import type { Match, MatchDetail } from './schema.js';
+import { forecast } from './predict.js';
 import type { Source } from '../sources/types.js';
 import { CircuitBreaker } from './breaker.js';
 import { store } from './store.js';
@@ -367,6 +368,25 @@ export class Scheduler {
     return job;
   }
 
+  /**
+   * Model forecast, computed from the league table we already hold.
+   *
+   * Costs one pass over ~20 rows, so it is done inline rather than given its
+   * own endpoint and round trip.
+   */
+  private attachForecast(detail: MatchDetail, slug: string): MatchDetail {
+    if (detail.match.state === 'finished' || detail.match.state === 'cancelled') {
+      return { ...detail, available: { ...detail.available, forecast: false } };
+    }
+    const table = detail.standings ?? store.getStandings(detail.match.league.slug || slug) ?? null;
+    const f = forecast(detail.match, table);
+    return {
+      ...detail,
+      forecast: f,
+      available: { ...detail.available, forecast: f !== null },
+    };
+  }
+
   private async attachStandings(detail: MatchDetail, slug: string): Promise<MatchDetail> {
     const leagueSlug = detail.match.league.slug || slug;
     try {
@@ -438,9 +458,10 @@ export class Scheduler {
           // from the standings cache so the tab exists wherever a table does,
           // rather than only for the source that happens to bundle one.
           const withTable = d.standings ? d : await this.attachStandings(d, slug);
-          store.setDetail(id, withTable);
+          const complete = this.attachForecast(withTable, slug);
+          store.setDetail(id, complete);
           this.breaker.success(src.name);
-          return withTable;
+          return complete;
         }
         throw new Error('no detail');
       } catch {

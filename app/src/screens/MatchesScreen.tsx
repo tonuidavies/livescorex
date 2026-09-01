@@ -48,7 +48,7 @@ export function MatchesScreen({ navigation }: Props) {
   const online = useOnline();
 
   const leagues = onlyMine ? prefs.leagues : [];
-  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt, goals } =
     useMatches({ mode: 'day', date, leagues, sport: prefs.sport });
 
   const anyLive = groups.some(g => g.matches.some(m => m.state === 'live'));
@@ -118,6 +118,7 @@ export function MatchesScreen({ navigation }: Props) {
               now={now}
               selecting={selecting}
               onLongPress={() => setSelecting(true)}
+              goalAt={goals[item.id]}
             />
           )}
           ListEmptyComponent={

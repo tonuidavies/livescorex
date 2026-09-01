@@ -458,6 +458,9 @@ export const fotmob: Source = {
       lineups,
       standings: null,
       headToHead,
+      // Filled by the scheduler once the league table is to hand — the
+      // adapter has no view of the standings cache.
+      forecast: null,
       available: {
         summary: events.length > 0,
         statistics: stats.length > 0,
@@ -465,6 +468,7 @@ export const fotmob: Source = {
         standings: false,
         headToHead: headToHead.length > 0,
         info: info.venue !== null || info.referee !== null || info.homeCoach !== null,
+        forecast: false,
       },
     };
   },
@@ -504,6 +508,9 @@ export const fotmob: Source = {
         draws: int(r?.draws) ?? 0,
         losses: int(r?.losses) ?? 0,
         goalDiff: int(r?.goalConDiff) ?? 0,
+        // "6-2" -> scored 6, conceded 2.
+        goalsFor: int(String(r?.scoresStr ?? '').split('-')[0]) ?? 0,
+        goalsAgainst: int(String(r?.scoresStr ?? '').split('-')[1]) ?? 0,
         points: int(r?.pts) ?? 0,
         marker: str(r?.qualColor) ? 'europe' : null,
       })),

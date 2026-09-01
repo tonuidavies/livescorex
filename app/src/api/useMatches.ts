@@ -12,6 +12,14 @@ interface State {
    *  a refetch is in flight instead of flashing a spinner over it. */
   hasData: boolean;
   lastLoadedAt: number;
+  /**
+   * Match id -> when a goal last landed for it.
+   *
+   * A score changing is the single most important thing this app ever has to
+   * say, and a digit quietly incrementing in a list of forty rows is easy to
+   * miss entirely. The list uses this to light the row up.
+   */
+  goals: Record<string, number>;
 }
 
 /**
@@ -26,7 +34,7 @@ export function useMatches({
 }: { mode: 'day' | 'live'; date: string; leagues: string[]; sport?: string }) {
   const [state, setState] = useState<State>({
     groups: [], loading: true, refreshing: false, error: null,
-    hasData: false, lastLoadedAt: 0,
+    hasData: false, lastLoadedAt: 0, goals: {},
   });
 
   const reqId = useRef(0);
@@ -56,10 +64,11 @@ export function useMatches({
         : await api.matches(date, leagues, sport);
       if (id !== reqId.current) return;                 // a newer request won
       shownKey.current = key;
-      setState({
+      setState(s => ({
+        ...s,
         groups: res.groups, loading: false, refreshing: false,
         error: null, hasData: true, lastLoadedAt: Date.now(),
-      });
+      }));
     } catch (e) {
       if (id !== reqId.current) return;
       setState(s => ({
@@ -84,10 +93,19 @@ export function useMatches({
   useEffect(() => subscribe(deltas => {
     setState(s => {
       let groups = s.groups;
+      let goals = s.goals;
       for (const d of deltas) {
         // A brand-new match only belongs here if it is in the sport on show;
         // the socket carries every sport the server polls.
         if (d.t === 'match' && d.match.league.sport !== sport) continue;
+        if (d.t === 'score') {
+          const before = groups.flatMap(g => g.matches).find(m => m.id === d.id);
+          // Only a change counts. A resync that re-states the same score is
+          // not a goal and must not set the whole screen flashing.
+          const changed =
+            before && (before.score.home !== d.home || before.score.away !== d.away);
+          if (changed) goals = { ...goals, [d.id]: Date.now() };
+        }
         groups = applyDelta(groups, d);
       }
       // In live mode a match that ends should drop off the list.
@@ -96,7 +114,8 @@ export function useMatches({
           .map(g => ({ ...g, matches: g.matches.filter(m => m.state === 'live' || m.state === 'halftime') }))
           .filter(g => g.matches.length > 0);
       }
-      return groups === s.groups ? s : { ...s, groups };
+      if (groups === s.groups && goals === s.goals) return s;
+      return { ...s, groups, goals };
     });
   }), [subscribe, mode, sport]);
 

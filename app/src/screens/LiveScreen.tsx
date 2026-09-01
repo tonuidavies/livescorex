@@ -46,7 +46,7 @@ export function LiveScreen({ navigation }: Props) {
 
   const leagues = onlyMine ? prefs.leagues : [];
   const online = useOnline();
-  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt, goals } =
     useMatches({ mode: 'live', date: '', leagues, sport: prefs.sport });
 
   // Live clocks are interpolated between server updates, so the list needs a
@@ -113,6 +113,7 @@ export function LiveScreen({ navigation }: Props) {
               now={now}
               selecting={selecting}
               onLongPress={() => setSelecting(true)}
+              goalAt={goals[item.id]}
             />
           )}
           ListEmptyComponent={

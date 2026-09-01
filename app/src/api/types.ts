@@ -106,6 +106,17 @@ export interface MatchInfo {
   awayCoach: string | null;
 }
 
+export interface Forecast {
+  home: number; draw: number; away: number;
+  expected: { home: number; away: number };
+  bothTeamsScore: number;
+  overTwoFive: number;
+  scorelines: Array<{ home: number; away: number; p: number }>;
+  confidence: 'low' | 'medium' | 'high';
+  basis: string[];
+  inPlay: boolean;
+}
+
 export interface MatchDetail {
   match: Match;
   info: MatchInfo;
@@ -114,9 +125,10 @@ export interface MatchDetail {
   lineups: { home: TeamLineup; away: TeamLineup } | null;
   standings: Standings | null;
   headToHead: Match[];
+  forecast: Forecast | null;
   available: {
     summary: boolean; statistics: boolean; lineup: boolean;
-    standings: boolean; headToHead: boolean; info: boolean;
+    standings: boolean; headToHead: boolean; info: boolean; forecast: boolean;
   };
 }
 

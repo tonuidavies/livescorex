@@ -554,6 +554,9 @@ function normaliseStandingRows(entries: any[]): StandingRow[] {
       draws: statOf(e, ['ties', 'draws']),
       losses: statOf(e, ['losses']),
       goalDiff: statOf(e, ['pointDifferential', 'pointdifferential']),
+      // ESPN reuses its generic points vocabulary for goals in football.
+      goalsFor: statOf(e, ['pointsFor']),
+      goalsAgainst: statOf(e, ['pointsAgainst']),
       points: statOf(e, ['points']),
       marker: null,
     };
@@ -732,6 +735,9 @@ export const espn: Source = {
       lineups,
       standings,
       headToHead,
+      // Filled by the scheduler once the league table is to hand — the
+      // adapter has no view of the standings cache.
+      forecast: null,
       available: {
         summary: events.length > 0,
         statistics: stats.length > 0,
@@ -739,6 +745,7 @@ export const espn: Source = {
         standings: standings !== null,
         headToHead: headToHead.length > 0,
         info: hasInfo,
+        forecast: false,
       },
     };
   },

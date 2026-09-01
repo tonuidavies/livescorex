@@ -1,8 +1,10 @@
 import React, { memo, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
+  Easing, interpolateColor, useAnimatedStyle, useSharedValue, withDelay,
+  withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, tabular, type as t, font } from '../theme';
 import type { Match } from '../api/types';
@@ -16,7 +18,7 @@ import { Star } from './Star';
  * so this is one component with a variant rather than two that drift apart.
  */
 export const MatchRow = memo(function MatchRow({
-  match, starred, onToggleStar, onPress, showOdds, now, selecting, onLongPress,
+  match, starred, onToggleStar, onPress, showOdds, now, selecting, onLongPress, goalAt,
 }: {
   match: Match;
   starred: boolean;
@@ -28,6 +30,8 @@ export const MatchRow = memo(function MatchRow({
   /** In selection mode the whole row toggles the star instead of opening. */
   selecting?: boolean;
   onLongPress?: () => void;
+  /** When a goal last landed for this match, epoch ms. */
+  goalAt?: number;
 }) {
   const { colors } = useTheme();
   const status = statusCell(match, now ?? Date.now());
@@ -41,6 +45,39 @@ export const MatchRow = memo(function MatchRow({
 
   const oddsVisible = showOdds && match.odds !== null && !played;
 
+  /*
+   * Goal flash.
+   *
+   * A score ticking over in a list of forty rows is genuinely easy to miss, so
+   * the whole row lights up rather than just the digit. It holds briefly and
+   * then fades, because a highlight that never clears stops meaning anything.
+   */
+  const flash = useSharedValue(0);
+  const lastGoal = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (!goalAt || goalAt === lastGoal.current) return;
+    lastGoal.current = goalAt;
+    // Ignore anything already stale — a remount must not replay old goals.
+    if (Date.now() - goalAt > 30_000) return;
+
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    flash.value = withSequence(
+      withTiming(1, { duration: 160, easing: Easing.out(Easing.quad) }),
+      withDelay(6000, withTiming(0, { duration: 1400, easing: Easing.inOut(Easing.quad) })),
+    );
+  }, [goalAt, flash]);
+
+  const flashStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      flash.value,
+      [0, 1],
+      ['rgba(47,191,49,0)', 'rgba(47,191,49,0.22)'],
+    ),
+  }));
+
+  const recentGoal = Boolean(goalAt && Date.now() - goalAt < 20_000);
+
   return (
     <Pressable
       onPress={selecting ? onToggleStar : onPress}
@@ -50,8 +87,11 @@ export const MatchRow = memo(function MatchRow({
         styles.row,
         {
           backgroundColor: pressed ? colors.cardAlt : colors.card,
-          borderColor: selecting && starred ? colors.accent : 'transparent',
-          borderWidth: selecting ? 1 : 0,
+          borderColor:
+            recentGoal ? colors.markerPromotion
+            : selecting && starred ? colors.accent
+            : 'transparent',
+          borderWidth: recentGoal || selecting ? 1 : 0,
         },
       ]}
       accessibilityRole="button"
@@ -61,6 +101,14 @@ export const MatchRow = memo(function MatchRow({
         status.text
       }
     >
+      <Animated.View style={[StyleSheet.absoluteFill, flashStyle]} pointerEvents="none" />
+
+      {recentGoal ? (
+        <View style={[styles.goalTag, { backgroundColor: colors.markerPromotion }]}>
+          <Text style={styles.goalTagText}>GOAL</Text>
+        </View>
+      ) : null}
+
       <View style={[styles.statusCell, { borderRightColor: colors.divider }]}>
         {/* Only while the clock is actually running — a pulsing dot beside
             "HT" claims motion that is not happening. */}
@@ -213,6 +261,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   pulse: { width: 5, height: 5, borderRadius: 3 },
+  goalTag: {
+    position: 'absolute', top: 0, right: 0,
+    paddingHorizontal: 6, paddingVertical: 1.5,
+    borderBottomLeftRadius: radius.sm, borderTopRightRadius: radius.md,
+  },
+  goalTagText: { color: '#FFF', fontFamily: font.bold, fontSize: 9, letterSpacing: 0.6 },
   teams: { flex: 1, justifyContent: 'center', paddingVertical: space.sm, paddingLeft: space.md, gap: 6 },
   teamLine: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   scores: { width: 34, justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: space.sm },

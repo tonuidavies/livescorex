@@ -119,6 +119,8 @@ export interface StandingRow {
   draws: number;
   losses: number;
   goalDiff: number;
+  goalsFor: number;
+  goalsAgainst: number;
   points: number;
   /** e.g. 'champions-league' | 'relegation' — drives the coloured edge bar */
   marker: string | null;
@@ -190,6 +192,8 @@ export interface Match {
 
 /** Everything the match-detail screen needs, fetched on demand. */
 /** Context shown above the timeline: where, who officiated, how many came. */
+import type { Forecast } from './predict.js';
+
 export interface MatchInfo {
   venue: string | null;
   city: string | null;
@@ -211,6 +215,8 @@ export interface MatchDetail {
   lineups: { home: TeamLineup; away: TeamLineup } | null;
   standings: Standings | null;
   headToHead: Match[];
+  /** Model forecast; null when there is no usable league table. */
+  forecast: Forecast | null;
   /** Which detail tabs this league can actually populate. The app hides the
    *  rest rather than rendering an empty tab. */
   available: {
@@ -220,8 +226,11 @@ export interface MatchDetail {
     standings: boolean;
     headToHead: boolean;
     info: boolean;
+    forecast: boolean;
   };
 }
+
+export type { Forecast } from './predict.js';
 
 /* ---------------------------------------------------------------------------
  * Realtime deltas

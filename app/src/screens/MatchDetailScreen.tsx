@@ -15,6 +15,7 @@ import { StandingsTable } from '../components/StandingsTable';
 import { Pitch } from '../components/Pitch';
 import { EmptyState, ErrorState, Loading } from '../components/StateViews';
 import { MatchInfoCard } from '../components/MatchInfo';
+import { ForecastCard } from '../components/ForecastCard';
 import { useNowTicker } from '../util/useMatchClock';
 import { MatchRow } from '../components/MatchRow';
 import type { MatchDetail } from '../api/types';
@@ -101,6 +102,7 @@ export function MatchDetailScreen({ route, navigation }: Props) {
       },
       { key: 'statistics', label: 'Statistics', enabled: a?.statistics === true },
       { key: 'lineup', label: 'Lineup', enabled: a?.lineup === true },
+      { key: 'forecast', label: 'Forecast', enabled: a?.forecast === true },
       { key: 'h2h', label: 'H2H', enabled: a?.headToHead === true },
       { key: 'standings', label: 'Standings', enabled: a?.standings === true },
       { key: 'info', label: 'Info', enabled: a?.info === true },
@@ -181,6 +183,10 @@ export function MatchDetailScreen({ route, navigation }: Props) {
               </Text>
             ) : null}
           </View>
+        )}
+
+        {tab === 'forecast' && detail.forecast && (
+          <ForecastCard forecast={detail.forecast} home={m.home} away={m.away} />
         )}
 
         {tab === 'info' && <MatchInfoCard info={detail.info} />}
