@@ -2,9 +2,11 @@
 
 Live football scores for 259 competitions, built Kenya-first.
 
-A TypeScript ingestion server that normalises free upstream feeds into one
-schema and fans out deltas over WebSocket, plus an Expo / React Native app
-implementing the wireframes.
+A TypeScript ingestion server that merges two free upstream feeds into one
+schema and fans out deltas over WebSocket, plus an Expo / React Native app.
+
+Around 700 competitions, match clocks accurate to the second, player ratings,
+coaches and xG.
 
 ```
 server/   Node 20+ · ESPN adapter · state-aware scheduler · REST + WS
@@ -44,9 +46,35 @@ npm run depth          # which detail tabs each tier-1 league can populate
 
 ## Where the data comes from
 
-Everything ships from ESPN's undocumented but unauthenticated JSON API. It is
-free, has no rate limit worth the name if you are polite, and — crucially —
-covers East and West Africa.
+Two sources, merged. Neither is sufficient alone.
+
+| | ESPN | FotMob |
+|---|---|---|
+| Match clock | whole minutes, changing ~once a minute | **seconds** (`"68:05"`) |
+| Player ratings | — | yes |
+| Coaches | — | yes |
+| Team stats | flat list of 10 | 8 grouped sections incl. xG |
+| Lineup positions | derived from position strings | real normalised coordinates |
+| Leagues on a Saturday | ~40 with fixtures | 148 |
+| **Kenya, Ghana, Uganda, Zambia, Zimbabwe** | **yes** | **no** |
+| Americas, NCAA | strong | thin |
+| Odds | yes | — |
+
+FotMob is what makes the app feel real-time and gives it the depth. ESPN is
+what makes it a *Kenyan* app — FotMob's own league index has 559 entries and
+not one of them is the Kenyan Premier League. So both run, and the merge layer
+decides per match.
+
+### Sofascore
+
+Asked for, and not used: every endpoint returns 403 regardless of headers,
+including a complete browser header set. That is TLS-fingerprint blocking at
+the edge rather than anything a header fixes, and getting past it needs
+fingerprint impersonation or residential proxies. FotMob serves the same
+purpose — second-level clocks and ratings — and is reachable with an honest
+browser User-Agent.
+
+### The ESPN catalogue
 
 **ESPN's published catalogue is incomplete.** The official endpoint lists 218
 soccer leagues. Probing FIFA country codes against the scoreboard endpoint
@@ -63,6 +91,25 @@ zam.1  Zambian Super League           zim.1  Zimbabwean Premier Soccer League
 `server/data/discover-leagues.py` regenerates it — worth re-running quarterly
 to pick up leagues ESPN adds without announcing.
 
+### Merging the two
+
+`data/build-league-map.mjs` maps FotMob's leagues onto ESPN slugs so one
+competition is one group with one logo. Name similarity alone is not safe —
+it mapped "Austrian Cup" onto "Austrian Bundesliga" and every women's
+Champions League onto every other — so a pair must first agree on
+women / youth / qualifying / cup / confederation, the mapping is one-to-one,
+and the 20 biggest competitions are pinned by id because fuzzy matching could
+not separate a bare "Champions League" from CAF's.
+
+`core/merge.ts` then dedupes at match level: both team names must match
+(accent-stripped, club-noise removed, abbreviations resolved so "Man Utd"
+meets "Manchester United") **and** kickoffs must fall within two hours. The
+richer record wins, and anything the winner lacks — odds, crests — is carried
+over so a merge never costs the user data.
+
+The store keeps each source's slate separately and merges on read, so the two
+cannot overwrite each other every poll cycle.
+
 ### Coverage is not uniform
 
 Measured, not assumed:
@@ -76,19 +123,18 @@ The African leagues return scores and a league table only. The app handles this
 by building the detail tabs from `MatchDetail.available`, so a Kenyan fixture
 simply has no Statistics tab rather than an empty one.
 
-Some things are unavailable from ESPN **anywhere**, in any league:
-
 | Asked for | Status |
 |---|---|
-| Live player ratings | **Not available.** ESPN publishes counting stats (fouls, passes) but no rating. Sofascore and FotMob compute their own; there is nothing to normalise here. |
-| Coaches / managers | **Not available.** Absent from both the summary and the team resource. |
-| Injury lists | **Not available.** The per-team injuries endpoint returns an empty set for every soccer league checked. |
-| Stadium, referee, attendance | Available — shipped on the Info tab. |
-| Head to head | Available — last five meetings. |
-| Odds | Available — see below. |
+| Live player ratings | Available wherever FotMob covers the competition. |
+| Coaches / managers | Same. |
+| Stadium, referee, capacity, attendance | Available from both. |
+| Head to head | Available from both. |
+| Odds | ESPN only, behind a flag — see below. |
+| Injury lists | **Still unavailable** from either source. |
 
-All three gaps are the same fix: a second adapter. FotMob has ratings, coaches
-and injuries; the `Source` interface exists to take it.
+A competition carried only by ESPN — the Kenyan Premier League among them —
+has no ratings and no coach, and the app hides those rather than showing empty
+sections.
 
 **If depth on local content matters, that needs a second source.** api-football
 carries the Kenyan Premier League as league `276` and would fill the gap.
@@ -160,23 +206,24 @@ keep and one they uninstall:
    discarding it; the app renders it behind a staleness banner. No spinner is
    ever drawn over data we already have.
 
-### The match clock is interpolated, not polled
+### The match clock
 
-The most common complaint about a scores app is that it trails a scout-fed
-service like Flashscore by about a minute. Most of that gap is not the
-pipeline — it is the clock granularity described above. Upstream publishes
-whole minutes that change roughly once a minute, so a received value is on
-average ~30s old before it leaves their servers.
+Two behaviours, because the sources differ.
 
-Polling faster cannot fix that, so the app does it on the display side: once a
-minute value has been held for 45 seconds it is more likely than not that the
-true minute has advanced, so tick once — and never more than once, so a genuine
-stall (VAR, an injury break) cannot run away. Any server update snaps straight
-back to the authoritative value.
+Where seconds are published, the app runs a real clock forward from the moment
+the value was observed. That is what makes it read level with a scout-fed
+service instead of a minute behind one.
 
-Live polling is still tight — 5s for tier 1, 12s for tier 2 — because that
-governs **goal** freshness, which is what people actually notice. The
-state-aware scheduler keeps the volume affordable regardless.
+Where only whole minutes are published — and they change just once a minute,
+measured directly at `75'` unchanged for 49 seconds — a received value is
+already ~30s stale and no polling rate fixes it. There the app ticks once
+after a value has been held 45 seconds, never more so a VAR break cannot run
+away, and snaps back on the next update.
+
+FotMob is polled whole-day: one request returns every live match in the world,
+so second-level clocks cost a single call every 6s across all competitions at
+once. ESPN keeps the per-league state-aware polling described above, reserved
+for the leagues only it carries.
 
 ### Deltas, not refetches
 
@@ -243,10 +290,10 @@ licensing, an 18+ rating and reduced AdMob demand. Displaying only, as here, is
 the low-risk end of that; the flag means a store reviewer's objection is a
 config change rather than a release.
 
-**A league filter, which the wireframes did not have.** 259 competitions is
-thousands of rows on a Saturday. Users follow a set during onboarding (Kenya
-and the big five pre-ticked) and reach everything else through Browse leagues
-or search.
+**Every competition by default, with a filter.** Both Matches and Live open on
+everything; the pill toggles ALL / MINE. Filtering by default made the app feel
+empty for anyone who had not curated it, and hid exactly the obscure fixtures
+that make a scores app worth opening.
 
 **States the wireframes did not cover**, all implemented: no matches today, no
 leagues followed, offline showing cached scores, stale banner with "updated
