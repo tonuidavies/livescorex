@@ -241,5 +241,13 @@ export interface DeltaFrame {
   /** monotonic per-server sequence so clients can detect gaps and resync */
   seq: number;
   ts: number;
+  /**
+   * Which day these deltas belong to (YYYYMMDD).
+   *
+   * Without it a client viewing next Saturday receives today's live updates
+   * and appends them to that screen — the backfill of one day and the live
+   * polling of another are indistinguishable on the wire.
+   */
+  day: string;
   deltas: Delta[];
 }

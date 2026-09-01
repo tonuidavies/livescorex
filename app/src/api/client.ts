@@ -88,7 +88,11 @@ export const api = {
   matches: (date: string, leagues?: string[], sport = 'soccer') => {
     const q = new URLSearchParams({ date, sport });
     if (leagues?.length) q.set('leagues', leagues.join(','));
-    return get<MatchesResponse>(`/v1/matches?${q}`);
+    // A day the server has never fetched is filled on demand, which takes a
+    // few seconds. The default 12s timeout aborted those requests and left
+    // the previous day's list on screen, which read as "tapping a date does
+    // nothing".
+    return get<MatchesResponse>(`/v1/matches?${q}`, 25_000);
   },
 
   live: (leagues?: string[], sport = 'soccer') => {

@@ -30,14 +30,24 @@ export function useMatches({
   });
 
   const reqId = useRef(0);
+  /** What the current `state.groups` actually describe. */
+  const shownKey = useRef<string>('');
 
   const load = useCallback(async (opts: { refresh?: boolean } = {}) => {
     const id = ++reqId.current;
+    const key = `${mode}|${date}|${sport}`;
+    // Switching day or sport must not leave the previous list on screen under
+    // a new heading — that is the wrong data, not stale data, and it made a
+    // date tap look like it had done nothing while the fetch ran.
+    const changedScope = shownKey.current !== '' && shownKey.current !== key;
+
     setState(s => ({
       ...s,
-      loading: !s.hasData,
+      groups: changedScope ? [] : s.groups,
+      hasData: changedScope ? false : s.hasData,
+      loading: changedScope || !s.hasData,
       refreshing: Boolean(opts.refresh),
-      error: opts.refresh ? null : s.error,
+      error: opts.refresh || changedScope ? null : s.error,
     }));
 
     try {
@@ -45,6 +55,7 @@ export function useMatches({
         ? await api.live(leagues, sport)
         : await api.matches(date, leagues, sport);
       if (id !== reqId.current) return;                 // a newer request won
+      shownKey.current = key;
       setState({
         groups: res.groups, loading: false, refreshing: false,
         error: null, hasData: true, lastLoadedAt: Date.now(),
@@ -65,13 +76,20 @@ export function useMatches({
 
   const { state: conn, subscribe, lastFrameAt } = useLiveSocket({
     leagues,
+    // Live mode always means today; day mode means whichever day is shown.
+    day: mode === 'live' ? undefined : date,
     onResync: () => void load({ refresh: true }),
   });
 
   useEffect(() => subscribe(deltas => {
     setState(s => {
       let groups = s.groups;
-      for (const d of deltas) groups = applyDelta(groups, d);
+      for (const d of deltas) {
+        // A brand-new match only belongs here if it is in the sport on show;
+        // the socket carries every sport the server polls.
+        if (d.t === 'match' && d.match.league.sport !== sport) continue;
+        groups = applyDelta(groups, d);
+      }
       // In live mode a match that ends should drop off the list.
       if (mode === 'live') {
         groups = groups
@@ -80,7 +98,7 @@ export function useMatches({
       }
       return groups === s.groups ? s : { ...s, groups };
     });
-  }), [subscribe, mode]);
+  }), [subscribe, mode, sport]);
 
   return {
     ...state,

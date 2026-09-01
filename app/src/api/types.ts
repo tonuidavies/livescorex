@@ -138,4 +138,10 @@ export type Delta =
   | { t: 'match'; id: string; match: Match }
   | { t: 'gone'; id: string };
 
-export interface DeltaFrame { seq: number; ts: number; deltas: Delta[] }
+export interface DeltaFrame {
+  seq: number;
+  ts: number;
+  /** Which day these deltas belong to (YYYYMMDD). */
+  day: string;
+  deltas: Delta[];
+}

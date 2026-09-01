@@ -8,6 +8,14 @@ export type ConnState = 'connecting' | 'open' | 'offline';
 interface Options {
   /** League slugs to subscribe to. Empty means everything. */
   leagues: string[];
+  /**
+   * Only deltas for this day are delivered.
+   *
+   * The backfill of one day and the live polling of another are
+   * indistinguishable on the wire otherwise, so a client viewing next
+   * Saturday would quietly accumulate today's fixtures.
+   */
+  day?: string;
   /** Called when the stream reports a gap in `seq` — refetch rather than drift. */
   onResync?: () => void;
   enabled?: boolean;
@@ -20,7 +28,7 @@ interface Options {
  * stream nobody is looking at is pure cost, and backgrounded score updates are
  * the push notification's job, not the socket's.
  */
-export function useLiveSocket({ leagues, onResync, enabled = true }: Options) {
+export function useLiveSocket({ leagues, day, onResync, enabled = true }: Options) {
   const [state, setState] = useState<ConnState>('connecting');
   const [lastFrameAt, setLastFrameAt] = useState<number>(0);
 
@@ -29,6 +37,8 @@ export function useLiveSocket({ leagues, onResync, enabled = true }: Options) {
   const seqRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handlersRef = useRef<Set<(d: Delta[]) => void>>(new Set());
+  const dayRef = useRef(day);
+  useEffect(() => { dayRef.current = day; }, [day]);
   const closedByUs = useRef(false);
 
   const leagueKey = useMemo(() => [...leagues].sort().join(','), [leagues]);
@@ -84,6 +94,9 @@ export function useLiveSocket({ leagues, onResync, enabled = true }: Options) {
           }
           seqRef.current = msg.seq;
           setLastFrameAt(Date.now());
+          // Frames for another day are still counted as "we heard something",
+          // which keeps the staleness banner honest, but are not applied.
+          if (dayRef.current && msg.day && msg.day !== dayRef.current) return;
           for (const h of handlersRef.current) h(msg.deltas);
         } catch { /* malformed frame — ignore, the next one will be fine */ }
       };

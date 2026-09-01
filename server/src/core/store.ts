@@ -43,7 +43,7 @@ export class Store {
   private details = new Map<string, { detail: MatchDetail; at: number }>();
 
   private seq = 0;
-  private listeners = new Set<(deltas: Delta[], seq: number) => void>();
+  private listeners = new Set<(deltas: Delta[], seq: number, day: string) => void>();
 
   constructor() {
     this.load();
@@ -165,13 +165,25 @@ export class Store {
     }
 
     day.set(slug, { matches, fetchedAt: Date.now(), stale: false });
-    if (deltas.length) this.broadcast(deltas);
+    if (deltas.length) this.broadcast(deltas, dayKey);
     return deltas;
   }
 
   /** Which league-days a source currently holds, for targeted re-merges. */
   sourceSlugs(dayKey: string, sourceName: string): string[] {
     return [...(this.sourceDays.get(dayKey)?.get(sourceName)?.keys() ?? [])];
+  }
+
+  /**
+   * One source's own previous view of a league-day.
+   *
+   * Distinct from `getLeagueDay`, which returns the merged slate. Sanity
+   * checks must compare like with like: judging ESPN's payload against a
+   * merged slate containing FotMob's fixtures marks ESPN as broken every time
+   * the other source covers a match it does not.
+   */
+  getSourceLeagueDay(dayKey: string, slug: string, sourceName: string): Match[] | undefined {
+    return this.sourceDays.get(dayKey)?.get(sourceName)?.get(slug);
   }
 
   /**
@@ -186,15 +198,15 @@ export class Store {
 
   /* ---------------------------------------------------------- broadcast */
 
-  subscribe(fn: (deltas: Delta[], seq: number) => void): () => void {
+  subscribe(fn: (deltas: Delta[], seq: number, day: string) => void): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
   }
 
-  private broadcast(deltas: Delta[]): void {
+  private broadcast(deltas: Delta[], day: string): void {
     this.seq += 1;
     for (const fn of this.listeners) {
-      try { fn(deltas, this.seq); } catch { /* a bad subscriber must not stop the rest */ }
+      try { fn(deltas, this.seq, day); } catch { /* a bad subscriber must not stop the rest */ }
     }
   }
 

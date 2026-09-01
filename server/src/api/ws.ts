@@ -53,7 +53,7 @@ export function attachWebSocket(server: Server): { clients: () => number } {
   }, 30_000);
   heartbeat.unref();
 
-  store.subscribe((deltas: Delta[], seq: number) => {
+  store.subscribe((deltas: Delta[], seq: number, day: string) => {
     for (const c of clients.values()) {
       if (c.ws.readyState !== WebSocket.OPEN) continue;
 
@@ -65,7 +65,7 @@ export function attachWebSocket(server: Server): { clients: () => number } {
         : deltas;
 
       if (!relevant.length) continue;
-      const frame: DeltaFrame = { seq, ts: Date.now(), deltas: relevant };
+      const frame: DeltaFrame = { seq, ts: Date.now(), day, deltas: relevant };
       try { c.ws.send(JSON.stringify(frame)); } catch { /* dropped next heartbeat */ }
     }
   });

@@ -69,11 +69,29 @@ export function sameMatch(a: Match, b: Match): boolean {
 }
 
 /**
+ * How much detail each source can put on the match screen — ratings, coaches,
+ * xG, grouped stats. Used to break ties once a match has started, when that
+ * depth is the whole difference between the two records.
+ */
+const DETAIL_DEPTH: Record<string, number> = {
+  fotmob: 8,
+  espn: 3,
+};
+
+/**
  * How much a record is worth keeping when two sources describe one fixture.
  *
  * A second-level clock dominates everything else — it is the whole reason a
  * second source was added — but a record with no score at all loses to one
  * that has it, so a temporarily empty payload never wins.
+ *
+ * Two subtleties learned from real matches:
+ *
+ *  - Odds only count before kick-off. They are hidden once a match starts, so
+ *    letting them win a merge for a finished game traded away the ratings and
+ *    coaches on the detail screen for a value nothing renders.
+ *  - Once a match has started, detail depth breaks the tie. Without it the
+ *    winner depended on which source happened to write to the store first.
  */
 function score(m: Match): number {
   let s = 0;
@@ -81,8 +99,9 @@ function score(m: Match): number {
   if (m.score.home !== null) s += 20;
   if (m.state === 'live' || m.state === 'halftime') s += 10;
   if (m.home.crest) s += 4;
-  if (m.odds) s += 3;
+  if (m.odds && m.state === 'scheduled') s += 3;
   if (m.minute !== null) s += 2;
+  if (m.state !== 'scheduled') s += DETAIL_DEPTH[m.source] ?? 0;
   return s;
 }
 

@@ -2,7 +2,7 @@ import type { Match, MatchDetail } from './schema.js';
 import type { Source } from '../sources/types.js';
 import { CircuitBreaker } from './breaker.js';
 import { store } from './store.js';
-import { LEAGUES } from '../catalog.js';
+import { LEAGUES, LEAGUE_BY_SLUG } from '../catalog.js';
 import { config } from '../config.js';
 import { fetchFotmobDay } from '../sources/fotmob.js';
 
@@ -20,6 +20,8 @@ interface Stats {
   lastSweepMs: number | null;
   pollsThisMinute: number;
   deltasEmitted: number;
+  /** Payloads rejected as implausibly empty — see the sanity gate. */
+  suspiciousEmpty: number;
 }
 
 /**
@@ -47,7 +49,7 @@ export class Scheduler {
 
   readonly stats: Stats = {
     requests: 0, sweeps: 0, lastSweepAt: null, lastSweepMs: null,
-    pollsThisMinute: 0, deltasEmitted: 0,
+    pollsThisMinute: 0, deltasEmitted: 0, suspiciousEmpty: 0,
   };
 
   /** FotMob-specific counters, surfaced in /health. */
@@ -154,24 +156,36 @@ export class Scheduler {
    * plausible payload wins; if all fail the previous slate is kept and marked
    * stale rather than cleared.
    */
-  private async fetchLeagueDay(slug: string, day: string): Promise<boolean> {
+  private async fetchLeagueDay(slug: string, day: string, force = false): Promise<boolean> {
     for (const src of this.sources) {
       // Sources without a per-league query are driven by their own whole-day
       // path; calling them here would count an intentional no-op as a failure
       // and trip their breaker.
       if (!src.supportsLeagueDay) continue;
-      if (this.breaker.isOpen(src.name)) continue;
+      // `force` is for user-initiated fetches: somebody tapping a date should
+      // get a live attempt rather than an empty screen because a background
+      // poll tripped the breaker a minute ago.
+      if (!force && this.breaker.isOpen(src.name)) continue;
       try {
         this.stats.requests += 1;
         const matches = await src.fetchLeagueDay(slug, day);
         if (matches === null) throw new Error('source returned null');
 
         // Sanity gate: a source that starts answering 200-with-nothing is a
-        // silent failure, and it is a nastier bug than an outright 403. Only
-        // trust an empty slate when we had nothing there before either.
-        const prev = store.getLeagueDay(day, slug);
-        if (matches.length === 0 && prev && prev.matches.length > 0) {
-          throw new Error('suspicious empty slate');
+        // silent failure, and a nastier bug than an outright 403.
+        //
+        // Compared against this source's *own* previous slate, not the merged
+        // one — otherwise every day where the other source covers a fixture
+        // this one does not counts as a failure here, and three of those in a
+        // row opened the breaker for five minutes, which silently emptied
+        // every date the user tapped.
+        const prev = store.getSourceLeagueDay(day, slug, src.name);
+        if (matches.length === 0 && prev && prev.length > 0) {
+          // A payload judgement, not a statement about the source's health:
+          // deliberately does not count toward the breaker.
+          this.stats.suspiciousEmpty += 1;
+          store.markStale(day, slug);
+          return false;
         }
 
         this.breaker.success(src.name);
@@ -311,20 +325,42 @@ export class Scheduler {
     const existing = this.dayFetches.get(key);
     if (existing) return existing;
 
-    const job = (async () => {
-      const CONCURRENCY = 6;
+    // Fetching every competition for an untouched day takes ~20s, which is
+    // longer than anyone will wait after tapping a date. So the caller is
+    // unblocked once the leagues people actually follow are in — a couple of
+    // seconds — and the long tail continues in the background, reaching the
+    // client as deltas.
+    const byTier = (a: string, b: string) => {
+      const ta = LEAGUE_BY_SLUG.get(a)?.tier ?? 2;
+      const tb = LEAGUE_BY_SLUG.get(b)?.tier ?? 2;
+      return ta - tb;
+    };
+    const ordered = [...missing].sort(byTier);
+    const priority = ordered.filter(s => (LEAGUE_BY_SLUG.get(s)?.tier ?? 2) === 1);
+    const tail = ordered.filter(s => (LEAGUE_BY_SLUG.get(s)?.tier ?? 2) !== 1);
+
+    const run = async (list: string[], concurrency: number) => {
       let cursor = 0;
       const worker = async () => {
-        while (cursor < missing.length) {
-          const slug = missing[cursor++];
+        while (cursor < list.length) {
+          const slug = list[cursor++];
           if (!slug) break;
-          await this.fetchLeagueDay(slug, day);
-          await sleep(30);
+          await this.fetchLeagueDay(slug, day, true);
+          await sleep(25);
         }
       };
-      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-      console.log(`[sched] on-demand fetch of ${missing.length} leagues for ${day}`);
-    })().finally(() => this.dayFetches.delete(key));
+      await Promise.all(Array.from({ length: concurrency }, worker));
+    };
+
+    const job = (async () => {
+      await run(priority, 8);
+      // Not awaited: the response goes out now and the rest streams in.
+      void run(tail, 6)
+        .then(() => console.log(`[sched] backfilled ${tail.length} more leagues for ${day}`))
+        .catch(() => {})
+        .finally(() => this.dayFetches.delete(key));
+      console.log(`[sched] on-demand fetch for ${day}: ${priority.length} priority, ${tail.length} queued`);
+    })();
 
     this.dayFetches.set(key, job);
     return job;
