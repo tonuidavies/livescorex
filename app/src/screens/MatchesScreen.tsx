@@ -47,7 +47,7 @@ export function MatchesScreen({ navigation }: Props) {
   const online = useOnline();
 
   const leagues = onlyMine ? prefs.leagues : [];
-  const { groups, loading, refreshing, error, hasData, conn, reload, lastLoadedAt } =
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
     useMatches({ mode: 'day', date, leagues });
 
   const anyLive = groups.some(g => g.matches.some(m => m.state === 'live'));
@@ -58,7 +58,7 @@ export function MatchesScreen({ navigation }: Props) {
     [groups],
   );
 
-  const fresh = freshness(groups, conn, online, lastLoadedAt);
+  const fresh = freshness(groups, conn, online, lastHeardAt);
 
   const openMatch = useCallback((m: Match) => {
     navigation.navigate('MatchDetail', { matchId: m.id, leagueSlug: m.league.slug });

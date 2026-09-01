@@ -391,7 +391,8 @@ function normaliseStats(boxscore: any): TeamStat[] {
     if (hn !== null && an !== null) {
       if (isPct) share = Math.min(1, Math.max(0, hn / 100));
       else if (hn + an > 0) share = hn / (hn + an);
-      else share = 0.5;
+      // 0 against 0 stays null so no bar is drawn — a half-filled track on
+      // both sides reads as activity where nothing happened.
     }
 
     out.push({

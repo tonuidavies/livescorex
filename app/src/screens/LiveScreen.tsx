@@ -45,7 +45,7 @@ export function LiveScreen({ navigation }: Props) {
 
   const leagues = onlyMine ? prefs.leagues : [];
   const online = useOnline();
-  const { groups, loading, refreshing, error, hasData, conn, reload, lastLoadedAt } =
+  const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
     useMatches({ mode: 'live', date: '', leagues });
 
   // Live clocks are interpolated between server updates, so the list needs a
@@ -79,7 +79,7 @@ export function LiveScreen({ navigation }: Props) {
         <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />
       ) : null}
 
-      <StaleBanner state={freshness(groups, conn, online, lastLoadedAt)} />
+      <StaleBanner state={freshness(groups, conn, online, lastHeardAt)} />
 
       {loading && !hasData ? (
         <View style={{ paddingTop: space.lg }}><RowSkeleton /></View>

@@ -16,6 +16,8 @@ export interface Palette {
   card: string;
   cardAlt: string;
   header: string;
+  /** Foot of the match-header gradient. */
+  headerDeep: string;
   border: string;
   divider: string;
 
@@ -49,7 +51,8 @@ const dark: Palette = {
   chrome: '#18181B',
   card: '#29282D',
   cardAlt: '#232227',
-  header: '#2F283B',
+  header: '#332C40',
+  headerDeep: '#241F2E',
   border: '#3A383F',
   divider: '#333238',
 
@@ -83,7 +86,8 @@ const light: Palette = {
   chrome: '#FFFFFF',
   card: '#FFFFFF',
   cardAlt: '#ECECEF',
-  header: '#3B3350',
+  header: '#413859',
+  headerDeep: '#2E2740',
   border: '#DCDCE2',
   divider: '#E6E6EA',
 
@@ -130,6 +134,15 @@ export const font = {
   bold: 'Inter_700Bold',
 } as const;
 
+/**
+ * Tabular figures for anything that changes in place.
+ *
+ * Proportional digits are different widths, so a clock ticking 1 -> 2 -> 3
+ * shifts everything beside it every second, and a score flipping 0 -> 1 nudges
+ * the row. This is a legibility fix, not a flourish.
+ */
+export const tabular = { fontVariant: ['tabular-nums' as const] };
+
 export const type = {
   h1: { fontFamily: font.bold, fontSize: 30, lineHeight: 38 },
   h2: { fontFamily: font.bold, fontSize: 22, lineHeight: 28 },
@@ -137,7 +150,7 @@ export const type = {
   body: { fontFamily: font.regular, fontSize: 15, lineHeight: 21 },
   bodyMed: { fontFamily: font.medium, fontSize: 15, lineHeight: 21 },
   team: { fontFamily: font.semibold, fontSize: 15.5, lineHeight: 20 },
-  score: { fontFamily: font.bold, fontSize: 17, lineHeight: 22 },
+  score: { fontFamily: font.bold, fontSize: 17, lineHeight: 22, fontVariant: ['tabular-nums' as const] },
   label: { fontFamily: font.medium, fontSize: 13, lineHeight: 17 },
   caption: { fontFamily: font.regular, fontSize: 11.5, lineHeight: 15 },
   tab: { fontFamily: font.medium, fontSize: 11, lineHeight: 14 },

@@ -6,7 +6,11 @@ import { radius, space, type as t, font } from '../theme';
 import type { LineupPlayer, TeamLineup } from '../api/types';
 import { Rating } from './Rating';
 
-const NODE = 30;
+const NODE = 28;
+/** Inset at the top of the pitch so the far keeper is not flush to the line. */
+const PAD_TOP = 10;
+/** Room at the foot for the near keeper's name tag, which hangs below him. */
+const PAD_BOTTOM = 28;
 
 /**
  * Vertical pitch with both XIs.
@@ -30,7 +34,13 @@ export function Pitch({
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const w = width - space.md * 2;
-  const h = w * 1.45;
+  const h = w * 1.62;
+
+  // Every name tag hangs below its own circle. Alternating the side by team
+  // put the near side's tags between two rows, where it was genuinely unclear
+  // which player each one belonged to; the pitch is inset instead so the
+  // bottom keeper's tag still fits.
+  const usableH = h - PAD_TOP - PAD_BOTTOM;
 
   const usable = home.hasPitchPositions || away.hasPitchPositions;
   if (!usable) return <LineupList home={home} away={away} homeName={homeName} awayName={awayName} />;
@@ -57,8 +67,7 @@ export function Pitch({
             player={p}
             color={awayColor}
             left={(1 - (p.x ?? 0.5)) * w - NODE / 2}
-            top={(p.y ?? 0.5) * 0.5 * h - NODE / 2}
-            tag="below"
+            top={PAD_TOP + (p.y ?? 0.5) * 0.5 * usableH - NODE / 2}
           />
         ))}
         {starters(home).map(p => (
@@ -67,10 +76,7 @@ export function Pitch({
             player={p}
             color={homeColor}
             left={(p.x ?? 0.5) * w - NODE / 2}
-            top={(1 - (p.y ?? 0.5) * 0.5) * h - NODE / 2}
-            /* Home names sit above the circle so the keeper's tag, which is
-               hard against the goal line, stays inside the pitch. */
-            tag="above"
+            top={PAD_TOP + (1 - (p.y ?? 0.5) * 0.5) * usableH - NODE / 2}
           />
         ))}
       </View>
@@ -110,43 +116,40 @@ function TeamMeta({
   );
 }
 
+/**
+ * One player on the pitch.
+ *
+ * The circle is anchored exactly on its coordinate and everything else hangs
+ * off it absolutely. An earlier version stacked the name tag in normal flow
+ * and shifted the whole node up to compensate, which moved the circle off its
+ * position and left the bottom half's tags overlapping the row above.
+ *
+ * The name tag is wider than the circle, so it is centred by pinning both
+ * edges outside the node and letting it size itself, and it always hangs
+ * directly below its own circle so ownership is never ambiguous.
+ */
 function PlayerNode({
-  player, color, left, top, tag,
+  player, color, left, top,
 }: {
   player: LineupPlayer;
   color: string;
   left: number;
   top: number;
-  tag: 'above' | 'below';
 }) {
   const { colors } = useTheme();
 
-  const nameTag = (
-    <View
-      key="tag"
-      style={[
-        styles.nameTag,
-        { backgroundColor: 'rgba(0,0,0,0.72)' },
-        tag === 'above' ? { marginBottom: 3 } : { marginTop: 3 },
-      ]}
-    >
-      <Text style={styles.nameText} numberOfLines={1}>
-        {player.shortName}
-      </Text>
-    </View>
-  );
-
-  const circle = (
-    <View key="circle" style={styles.circleWrap}>
+  return (
+    <View style={[styles.node, { left, top }]} pointerEvents="none">
       <View
         style={[
           styles.circle,
           { backgroundColor: color },
-          player.motm && { borderWidth: 2, borderColor: '#F2C230' },
+          player.motm && styles.motm,
         ]}
       >
         <Text style={styles.number}>{player.number ?? ''}</Text>
       </View>
+
       {player.yellow || player.red ? (
         <View
           style={[
@@ -155,25 +158,26 @@ function PlayerNode({
           ]}
         />
       ) : null}
+
       {player.goals > 0 ? (
         <View style={styles.goalPip}>
           <Text style={styles.goalPipText}>
-            {player.goals > 1 ? `⚽${player.goals}` : '⚽'}
+            {player.goals > 1 ? `${player.goals}` : ''}⚽
           </Text>
         </View>
       ) : null}
+
       {player.rating !== null ? (
         <Rating value={player.rating} size="sm" style={styles.ratingChip} />
       ) : null}
-    </View>
-  );
 
-  return (
-    <View
-      style={[styles.node, { left, top: tag === 'above' ? top - 18 : top }]}
-      pointerEvents="none"
-    >
-      {tag === 'above' ? [nameTag, circle] : [circle, nameTag]}
+      <View style={[styles.tagSlot, { top: NODE + 3 }]}>
+        <View style={[styles.nameTag, { backgroundColor: 'rgba(0,0,0,0.78)' }]}>
+          <Text style={styles.nameText} numberOfLines={1}>
+            {player.shortName}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -259,11 +263,13 @@ function LineupList({
 const styles = StyleSheet.create({
   pitch: { borderRadius: radius.md, overflow: 'hidden', alignSelf: 'center' },
   formations: { flexDirection: 'row', justifyContent: 'space-between', marginTop: space.sm },
-  node: { position: 'absolute', width: NODE, alignItems: 'center' },
-  circleWrap: { width: NODE, height: NODE, alignItems: 'center', justifyContent: 'center' },
-  ratingChip: { position: 'absolute', bottom: -8, right: -14 },
-  goalPip: { position: 'absolute', left: -10, top: -4 },
-  goalPipText: { fontSize: 9 },
+  node: { position: 'absolute', width: NODE, height: NODE },
+  motm: { borderWidth: 2, borderColor: '#F2C230' },
+  ratingChip: { position: 'absolute', bottom: -7, right: -13 },
+  goalPip: { position: 'absolute', left: -9, top: -5 },
+  goalPipText: { fontSize: 9, color: '#FFF' },
+  /** Pinned wider than the node so a long name stays centred on the circle. */
+  tagSlot: { position: 'absolute', left: -34, right: -34, alignItems: 'center' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
   swatch: { width: 8, height: 8, borderRadius: 2 },
   circle: {
@@ -272,7 +278,7 @@ const styles = StyleSheet.create({
   },
   number: { color: '#FFF', fontFamily: font.bold, fontSize: 12 },
   card: { position: 'absolute', right: -3, top: -2, width: 7, height: 10, borderRadius: 1.5 },
-  nameTag: { paddingHorizontal: 5, paddingVertical: 1.5, borderRadius: 3, maxWidth: 90 },
+  nameTag: { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 3, maxWidth: 92 },
   nameText: { color: '#FFF', fontFamily: font.medium, fontSize: 9.5 },
   listRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   miniCard: { width: 6, height: 9, borderRadius: 1 },

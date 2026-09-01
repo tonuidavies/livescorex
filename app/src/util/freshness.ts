@@ -22,20 +22,23 @@ export function freshness(
   groups: LeagueGroup[],
   conn: ConnState,
   online: boolean,
-  lastLoadedAt: number,
+  lastHeardAt: number,
 ): Freshness {
   if (!online) return { kind: 'offline' };
-  if (conn === 'offline') return { kind: 'disconnected', since: lastLoadedAt || Date.now() };
+  if (conn === 'offline') return { kind: 'disconnected', since: lastHeardAt || Date.now() };
 
   // Staleness only matters where something is in progress.
-  const liveGroups = groups.filter(g =>
+  const anyLive = groups.some(g =>
     g.matches.some(m => m.state === 'live' || m.state === 'halftime'),
   );
-  if (liveGroups.length === 0) return { kind: 'ok' };
+  if (!anyLive) return { kind: 'ok' };
 
-  const oldest = Math.min(...liveGroups.map(g => g.fetchedAt));
-  const STALE_AFTER_MS = 120_000;
-  if (Date.now() - oldest > STALE_AFTER_MS) return { kind: 'stale', since: oldest };
+  // `lastHeardAt`, not the server's `fetchedAt`: the latter is captured once
+  // at response time and then ages on the client even while delta frames keep
+  // arriving, which warned about a screen that was perfectly current.
+  const since = lastHeardAt || Date.now();
+  const STALE_AFTER_MS = 150_000;
+  if (Date.now() - since > STALE_AFTER_MS) return { kind: 'stale', since };
 
   return { kind: 'ok' };
 }

@@ -232,9 +232,11 @@ function normaliseStats(statsBlock: any): TeamStat[] {
       const hn = Number(String(h ?? '').replace('%', ''));
       const an = Number(String(a ?? '').replace('%', ''));
       let share: number | null = null;
-      if (Number.isFinite(hn) && Number.isFinite(an)) {
-        share = hn + an > 0 ? hn / (hn + an) : 0.5;
+      if (Number.isFinite(hn) && Number.isFinite(an) && hn + an > 0) {
+        share = hn / (hn + an);
       }
+      // 0 against 0 gets no bar at all: a half-filled track on both sides
+      // reads as activity where nothing happened.
 
       out.push({
         key: str(s?.key) ?? str(s?.title) ?? `stat-${out.length}`,

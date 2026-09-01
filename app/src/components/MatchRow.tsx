@@ -4,7 +4,7 @@ import Animated, {
   Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { radius, space, type as t, font } from '../theme';
+import { radius, space, tabular, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { statusCell } from '../util/format';
 import { Crest } from './Crest';
@@ -62,11 +62,14 @@ export const MatchRow = memo(function MatchRow({
       }
     >
       <View style={[styles.statusCell, { borderRightColor: colors.divider }]}>
-        {live ? <LivePulse color={colors.liveBright} /> : null}
+        {/* Only while the clock is actually running — a pulsing dot beside
+            "HT" claims motion that is not happening. */}
+        {match.state === 'live' ? <LivePulse color={colors.liveBright} /> : null}
         <Text
           style={[
             t.label,
-            { color: statusColor, fontVariant: ['tabular-nums'] },
+            tabular,
+            { color: statusColor },
           ]}
           numberOfLines={1}
         >
@@ -89,11 +92,15 @@ export const MatchRow = memo(function MatchRow({
 
       {oddsVisible ? (
         <View style={styles.odds}>
-          <Text style={[t.caption, { color: colors.textMuted }]}>{match.odds!.home.toFixed(2)}</Text>
-          <Text style={[t.caption, { color: colors.textMuted }]}>
+          <Text style={[t.caption, tabular, { color: colors.textMuted }]}>
+            {match.odds!.home.toFixed(2)}
+          </Text>
+          <Text style={[t.caption, tabular, { color: colors.textMuted }]}>
             {match.odds!.draw !== null ? match.odds!.draw.toFixed(2) : '—'}
           </Text>
-          <Text style={[t.caption, { color: colors.textMuted }]}>{match.odds!.away.toFixed(2)}</Text>
+          <Text style={[t.caption, tabular, { color: colors.textMuted }]}>
+            {match.odds!.away.toFixed(2)}
+          </Text>
         </View>
       ) : null}
 
@@ -178,6 +185,7 @@ function ScoreDigit({ value, live }: { value: number; live: boolean }) {
     <Animated.Text
       style={[
         anim,
+        tabular,
         { color: live ? colors.live : colors.text, fontFamily: font.bold, fontSize: 16.5, lineHeight: 22 },
       ]}
     >

@@ -63,7 +63,7 @@ export function useMatches({
 
   useEffect(() => { void load(); }, [load]);
 
-  const { state: conn, subscribe } = useLiveSocket({
+  const { state: conn, subscribe, lastFrameAt } = useLiveSocket({
     leagues,
     onResync: () => void load({ refresh: true }),
   });
@@ -85,6 +85,15 @@ export function useMatches({
   return {
     ...state,
     conn,
+    /**
+     * When we last heard anything at all — a full load or a delta frame.
+     *
+     * Distinct from the server's own `fetchedAt`, which is captured once at
+     * HTTP response time and then ages on the client even while deltas keep
+     * arriving. Judging staleness by that produced a "scores may be delayed"
+     * warning over a perfectly live screen.
+     */
+    lastHeardAt: Math.max(state.lastLoadedAt, lastFrameAt),
     reload: () => load({ refresh: true }),
   };
 }

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
-import { space, type as t, font } from '../theme';
+import { space, tabular, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { kickoffTime, longDate, statusCell } from '../util/format';
 import { matchClock } from '../util/useMatchClock';
@@ -38,7 +39,15 @@ export function MatchHeader({
   const clock = matchClock(match, tick);
 
   return (
-    <View style={[styles.wrap, { backgroundColor: colors.header, paddingTop: insets.top + space.sm }]}>
+    <LinearGradient
+      // A flat block of colour behind a scoreline reads as a placeholder. The
+      // gradient is shallow on purpose — enough to give the header depth,
+      // not enough to compete with the score.
+      colors={[colors.header, colors.headerDeep]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={[styles.wrap, { paddingTop: insets.top + space.sm }]}
+    >
       <View style={styles.topRow}>
         <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="chevron-back" size={26} color="#FFF" />
@@ -60,12 +69,10 @@ export function MatchHeader({
           <View style={styles.clockWrap}>
             <View style={[styles.livePulse, { backgroundColor: colors.liveBright }]} />
             <Text
-              style={{
-                color: colors.liveBright,
-                fontFamily: font.bold,
-                fontSize: 15,
-                fontVariant: ['tabular-nums'],
-              }}
+              style={[
+                tabular,
+                { color: colors.liveBright, fontFamily: font.bold, fontSize: 15 },
+              ]}
             >
               {match.state === 'halftime' ? 'HT' : clock?.label ?? status.text}
             </Text>
@@ -115,7 +122,7 @@ export function MatchHeader({
           onToggle={onToggleAway}
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -163,5 +170,5 @@ const styles = StyleSheet.create({
   teamBlock: { flex: 1, alignItems: 'center', gap: space.sm },
   crestRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   centre: { width: 110, alignItems: 'center', paddingTop: space.md },
-  bigScore: { fontFamily: font.bold, fontSize: 26, lineHeight: 32 },
+  bigScore: { fontFamily: font.bold, fontSize: 28, lineHeight: 34, letterSpacing: 0.5, ...tabular },
 });

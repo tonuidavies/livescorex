@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
+} from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t } from '../theme';
@@ -114,12 +117,33 @@ export function ConnDot({ state }: { state: 'open' | 'connecting' | 'offline' })
   return <View style={[styles.pip, { backgroundColor: color }]} />;
 }
 
+/**
+ * Placeholder rows while the first load runs.
+ *
+ * The pulse matters: a row of static grey blocks is indistinguishable from
+ * content that failed to render, whereas a breathing one reads as "working".
+ */
 export function RowSkeleton({ count = 5 }: { count?: number }) {
   const { colors } = useTheme();
+  const pulse = useSharedValue(0.5);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 850, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true,
+    );
+  }, [pulse]);
+
+  const anim = useAnimatedStyle(() => ({ opacity: pulse.value }));
+
   return (
     <View style={{ paddingHorizontal: space.md }}>
       {Array.from({ length: count }).map((_, i) => (
-        <View key={i} style={[styles.skeleton, { backgroundColor: colors.skeleton }]} />
+        <Animated.View
+          key={i}
+          style={[styles.skeleton, { backgroundColor: colors.skeleton }, anim]}
+        />
       ))}
     </View>
   );
