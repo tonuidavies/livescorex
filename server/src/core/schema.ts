@@ -233,6 +233,10 @@ export type Delta =
   | { t: 'score'; id: string; home: number; away: number; minute: number | null }
   | { t: 'state'; id: string; state: MatchState; statusLabel: string; minute: number | null }
   | { t: 'minute'; id: string; minute: number }
+  /** Re-anchors the client's running clock. Emitted when the observed clock
+   *  drifts from what the client would be showing, so a fresher sample takes
+   *  effect immediately rather than at the next minute boundary. */
+  | { t: 'clock'; id: string; clockSeconds: number; clockAsOf: number }
   | { t: 'event'; id: string; event: MatchEvent }
   | { t: 'match'; id: string; match: Match }        // full record: new or resynced
   | { t: 'gone'; id: string };                      // postponed off the slate

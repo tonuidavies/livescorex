@@ -166,6 +166,17 @@ export function applyDelta(groups: LeagueGroup[], d: Delta): LeagueGroup[] {
         case 'minute':
           acc.push({ ...m, minute: d.minute, updatedAt: Date.now() });
           break;
+        case 'clock':
+          // Re-anchor the running clock on a fresher sample.
+          acc.push({
+            ...m,
+            clockSeconds: d.clockSeconds,
+            clockAsOf: d.clockAsOf,
+            minute: Math.floor(d.clockSeconds / 60),
+            minuteAsOf: d.clockAsOf,
+            updatedAt: Date.now(),
+          });
+          break;
         case 'match':
           acc.push(d.match);
           break;

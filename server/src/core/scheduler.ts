@@ -88,14 +88,14 @@ export class Scheduler {
   private fotmobRunning = false;
 
   /** One request; every live match on the planet. */
-  private async pollFotmob(days: string[] = [dayKey()]): Promise<void> {
+  private async pollFotmob(days: string[] = [dayKey()], fresh = true): Promise<void> {
     if (this.fotmobRunning) return;
     this.fotmobRunning = true;
     try {
       for (const day of days) {
         this.stats.requests += 1;
         this.fotmob.polls += 1;
-        const matches = await fetchFotmobDay(day);
+        const matches = await fetchFotmobDay(day, { fresh });
         if (!matches) { this.fotmob.failures += 1; continue; }
 
         this.fotmob.matches = matches.length;
@@ -134,7 +134,8 @@ export class Scheduler {
     await this.sweep([dayKey()]);
     console.log('[sched] bootstrap: extending horizon');
     await this.sweep(this.horizon().slice(1));
-    if (config.fotmobEnabled) await this.pollFotmob(this.horizon().slice(1));
+    // Future days are cacheable; only the live day needs a fresh read.
+    if (config.fotmobEnabled) await this.pollFotmob(this.horizon().slice(1), false);
     this.lastSweepDay = dayKey();
   }
 
@@ -256,7 +257,7 @@ export class Scheduler {
       this.lastSweepDay = today;
       await this.sweep(this.horizon());
       await this.sweep(this.tier1Horizon());
-      if (config.fotmobEnabled) await this.pollFotmob(this.horizon());
+      if (config.fotmobEnabled) await this.pollFotmob(this.horizon(), false);
       return;
     }
 

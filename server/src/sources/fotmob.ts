@@ -519,8 +519,24 @@ export const fotmob: Source = {
  * cheap to poll broadly: one request returns every live match in the world,
  * where ESPN needs one per league.
  */
-export async function fetchFotmobDay(day: string): Promise<Match[] | null> {
-  const res = await getJson<any>(`${BASE}/matches?date=${ymd(day)}`, {
+export async function fetchFotmobDay(
+  day: string,
+  opts: { fresh?: boolean } = {},
+): Promise<Match[] | null> {
+  /*
+   * The live poll bypasses the edge cache.
+   *
+   * Measured against the origin: a plain request comes back `Hit from
+   * cloudfront` with an `age` of up to 13s, and the match clock inside it is
+   * stale by exactly that much. That was the entire gap between this app and
+   * FotMob's own — not the poll cadence, which is a healthy 6s.
+   *
+   * Only today's live sweep does this. Fixture lists for other days are
+   * perfectly cacheable and are left alone, so this adds one uncached request
+   * every 6s rather than defeating their caching wholesale.
+   */
+  const bust = opts.fresh ? `&_=${Date.now()}` : '';
+  const res = await getJson<any>(`${BASE}/matches?date=${ymd(day)}${bust}`, {
     conditional: false,
     browserLike: true,
   });

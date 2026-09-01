@@ -35,6 +35,27 @@ export function diffMatch(prev: Match | undefined, next: Match): Delta[] {
     out.push({ t: 'minute', id: next.id, minute: next.minute });
   }
 
+  /*
+   * Re-anchor the running clock when a fresher sample disagrees with where the
+   * client would have interpolated to. Without this the client keeps ticking
+   * from its first anchor and only corrects on a minute change — so a sample
+   * that arrives 13s fresher takes up to a minute to show up.
+   */
+  if (next.clockSeconds !== null && next.clockAsOf !== null && next.clockRunning) {
+    const expected =
+      prev.clockSeconds !== null && prev.clockAsOf !== null
+        ? prev.clockSeconds + Math.floor((next.clockAsOf - prev.clockAsOf) / 1000)
+        : null;
+    if (expected === null || Math.abs(next.clockSeconds - expected) >= 3) {
+      out.push({
+        t: 'clock',
+        id: next.id,
+        clockSeconds: next.clockSeconds,
+        clockAsOf: next.clockAsOf,
+      });
+    }
+  }
+
   // Kickoff moved, venue set late, odds flipped on — rare, resync in full.
   if (prev.kickoff !== next.kickoff) {
     return [{ t: 'match', id: next.id, match: next }];

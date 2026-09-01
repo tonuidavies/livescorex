@@ -134,6 +134,7 @@ export type Delta =
   | { t: 'score'; id: string; home: number; away: number; minute: number | null }
   | { t: 'state'; id: string; state: MatchState; statusLabel: string; minute: number | null }
   | { t: 'minute'; id: string; minute: number }
+  | { t: 'clock'; id: string; clockSeconds: number; clockAsOf: number }
   | { t: 'event'; id: string; event: MatchEvent }
   | { t: 'match'; id: string; match: Match }
   | { t: 'gone'; id: string };
