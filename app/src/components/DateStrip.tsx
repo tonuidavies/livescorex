@@ -26,16 +26,19 @@ export function DateStrip({
     return out;
   }, [today]);
 
+  // Track the selected day, not just today, and re-run when it changes: the
+  // strip keeps its scroll position across re-renders, so switching sport left
+  // it parked on last week with nothing marked TODAY.
   useEffect(() => {
-    const idx = days.findIndex(d => d.isToday);
-    if (idx >= 0) {
-      // Land today just left of centre rather than flush left — it reads as
-      // "you are here" instead of "this is the start".
-      requestAnimationFrame(() =>
-        ref.current?.scrollTo({ x: Math.max(0, (idx - 1) * ITEM_W), animated: false }),
-      );
-    }
-  }, [days]);
+    const idx = days.findIndex(d => d.key === selected);
+    const target = idx >= 0 ? idx : days.findIndex(d => d.isToday);
+    if (target < 0) return;
+    // Land it just left of centre rather than flush left — it reads as
+    // "you are here" instead of "this is the start".
+    const x = Math.max(0, (target - 1) * ITEM_W);
+    const id = requestAnimationFrame(() => ref.current?.scrollTo({ x, animated: false }));
+    return () => cancelAnimationFrame(id);
+  }, [days, selected]);
 
   return (
     <View style={{ backgroundColor: colors.chrome }}>
