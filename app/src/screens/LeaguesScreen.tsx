@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Pressable, SectionList, StyleSheet, Text, TextInput, View,
+  Pressable, ScrollView, SectionList, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,7 @@ import { usePrefs } from '../store/prefs';
 import { LeagueCrest } from '../components/Crest';
 import { Star } from '../components/Star';
 import { ErrorState, Loading } from '../components/StateViews';
-import type { League } from '../api/types';
+import type { League, Sport } from '../api/types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Leagues'>;
@@ -29,16 +29,24 @@ export function LeaguesScreen({ navigation }: Props) {
   const { prefs, isLeague, toggleLeague } = usePrefs();
 
   const [all, setAll] = useState<League[] | null>(null);
+  const [sports, setSports] = useState<Sport[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
+  // Browsing scope, seeded from the app's current sport.
+  const [sport, setSport] = useState<string>(prefs.sport);
 
-  const load = () => {
+  const load = useCallback(() => {
     setError(null);
-    api.leagues()
-      .then(r => setAll(r.leagues))
+    setAll(null);
+    api.leagues(sport)
+      .then(r => { setAll(r.leagues); setSports(r.sports); })
       .catch(e => setError(e instanceof Error ? e.message : 'Could not load leagues'));
-  };
-  useEffect(load, []);
+  }, [sport]);
+  useEffect(load, [load]);
+
+  // Non-football leagues have no country dimension, so they group under the
+  // sport itself rather than pretending to a geography they do not have.
+  const grouped = sport === 'soccer';
 
   const sections = useMemo(() => {
     if (!all) return [];
@@ -54,9 +62,10 @@ export function LeaguesScreen({ navigation }: Props) {
 
     const byCountry = new Map<string, League[]>();
     for (const l of rest) {
-      const arr = byCountry.get(l.countryName) ?? [];
+      const key = grouped ? l.countryName : l.sportName;
+      const arr = byCountry.get(key) ?? [];
       arr.push(l);
-      byCountry.set(l.countryName, arr);
+      byCountry.set(key, arr);
     }
 
     const out: Array<{ title: string; data: League[] }> = [];
@@ -65,7 +74,7 @@ export function LeaguesScreen({ navigation }: Props) {
       out.push({ title: country.toUpperCase(), data: leagues.sort((x, y) => x.name.localeCompare(y.name)) });
     }
     return out;
-  }, [all, q, prefs.leagues]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [all, q, grouped, prefs.leagues]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
@@ -76,6 +85,42 @@ export function LeaguesScreen({ navigation }: Props) {
         <Text style={[t.h3, { color: colors.text, flex: 1, textAlign: 'center' }]}>Leagues</Text>
         <View style={{ width: 26 }} />
       </View>
+
+      {sports.length > 1 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          {sports.map(sp => {
+            const on = sp.sport === sport;
+            return (
+              <Pressable
+                key={sp.sport}
+                onPress={() => { setSport(sp.sport); setQ(''); }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: on ? colors.accent : colors.card,
+                    borderColor: on ? colors.accent : colors.border,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+              >
+                <Text
+                  style={[
+                    t.caption,
+                    { color: on ? colors.onAccent : colors.textMuted },
+                  ]}
+                >
+                  {sp.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      ) : null}
 
       <View style={[styles.search, { backgroundColor: colors.card }]}>
         <Ionicons name="search" size={18} color={colors.textMuted} />
@@ -120,7 +165,7 @@ export function LeaguesScreen({ navigation }: Props) {
               <View style={{ flex: 1 }}>
                 <Text style={[t.bodyMed, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
                 <Text style={[t.caption, { color: colors.textMuted }]} numberOfLines={1}>
-                  {item.countryName}
+                  {grouped ? item.countryName : item.sportName}
                   {item.tier === 1 ? '  ·  Fast updates' : ''}
                 </Text>
               </View>
@@ -146,6 +191,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md, height: 44, borderRadius: radius.md,
   },
   sectionHeader: { paddingHorizontal: space.md, paddingTop: space.lg, paddingBottom: space.sm },
+  chips: { paddingHorizontal: space.md, paddingBottom: space.sm, gap: space.sm },
+  chip: {
+    paddingHorizontal: space.md, paddingVertical: 7,
+    borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth,
+  },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: space.md,
     marginHorizontal: space.md, marginBottom: space.sm,

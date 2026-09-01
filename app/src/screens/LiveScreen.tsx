@@ -16,6 +16,7 @@ import { freshness } from '../util/freshness';
 import type { TabScreenProps } from '../navigation/types';
 import type { Match } from '../api/types';
 import { SelectionBar } from '../components/SelectionBar';
+import { SportBanner } from '../components/SportBanner';
 
 type Props = TabScreenProps<'Live'>;
 
@@ -46,7 +47,7 @@ export function LiveScreen({ navigation }: Props) {
   const leagues = onlyMine ? prefs.leagues : [];
   const online = useOnline();
   const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
-    useMatches({ mode: 'live', date: '', leagues });
+    useMatches({ mode: 'live', date: '', leagues, sport: prefs.sport });
 
   // Live clocks are interpolated between server updates, so the list needs a
   // heartbeat of its own to advance them.
@@ -74,6 +75,8 @@ export function LiveScreen({ navigation }: Props) {
         liveLabel={onlyMine ? 'MINE' : 'ALL'}
         connState={conn}
       />
+
+      <SportBanner onOpenMenu={() => setMenu(true)} />
 
       {selecting ? (
         <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />

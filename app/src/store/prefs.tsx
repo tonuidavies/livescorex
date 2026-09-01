@@ -28,6 +28,15 @@ export interface Prefs {
   /** Whether the starter set of leagues has ever been applied. Separate from
    *  `onboarded` so that clearing your leagues on purpose is respected. */
   seeded: boolean;
+
+  /**
+   * Which sport the Matches and Live tabs are showing.
+   *
+   * Not a filter within one list — a scope. Football and basketball fixtures
+   * interleaved in one column is nobody's idea of a scores app, so the drawer
+   * switches between them.
+   */
+  sport: string;
 }
 
 const DEFAULTS: Prefs = {
@@ -40,6 +49,7 @@ const DEFAULTS: Prefs = {
   account: null,
   apiUrl: null,
   seeded: false,
+  sport: 'soccer',
 };
 
 const KEY = 'livescorex.prefs.v1';

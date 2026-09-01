@@ -1,0 +1,742 @@
+[
+ {
+  "sport": "australian-football",
+  "sportName": "Aussie Rules",
+  "slug": "australian-football/afl",
+  "leagueSlug": "afl",
+  "name": "AFL",
+  "abbreviation": "AFL",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/afl.png",
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/caribbean-series",
+  "leagueSlug": "caribbean-series",
+  "name": "Caribbean Series",
+  "abbreviation": "CBWS",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-baseball.png",
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/dominican-winter-league",
+  "leagueSlug": "dominican-winter-league",
+  "name": "Dominican Winter League",
+  "abbreviation": "DOMWL",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/llb",
+  "leagueSlug": "llb",
+  "name": "Little League Baseball",
+  "abbreviation": "Little League Baseball World Series",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-baseball.png",
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/lls",
+  "leagueSlug": "lls",
+  "name": "Little League Softball",
+  "abbreviation": "Little League Softball World Series",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-softball.png",
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/mexican-winter-league",
+  "leagueSlug": "mexican-winter-league",
+  "name": "Mexican League",
+  "abbreviation": "LMB",
+  "logo": null,
+  "logoDark": "https://a.espncdn.com/guid/32976dd0-93ce-30e1-b67d-748202218cbd/logos/default-dark.png"
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/mlb",
+  "leagueSlug": "mlb",
+  "name": "MLB",
+  "abbreviation": "MLB",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/mlb.png",
+  "logoDark": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500-dark/mlb.png&w=500&h=500&transparent=true"
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/college-baseball",
+  "leagueSlug": "college-baseball",
+  "name": "NCAA Baseball",
+  "abbreviation": "CBASE",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-baseball.png",
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/college-softball",
+  "leagueSlug": "college-softball",
+  "name": "NCAA Softball",
+  "abbreviation": "CSOFT",
+  "logo": "https://a.espncdn.com/i/espn/misc_logos/500/ncaa_womens_softball.png",
+  "logoDark": "https://a.espncdn.com/i/espn/misc_logos/500/ncaa_womens_softball.png"
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/olympics-baseball",
+  "leagueSlug": "olympics-baseball",
+  "name": "Olympics Men's Baseball",
+  "abbreviation": "OLYBB",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/puerto-rican-winter-league",
+  "leagueSlug": "puerto-rican-winter-league",
+  "name": "Puerto Rican Winter League",
+  "abbreviation": "PUERT",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/venezuelan-winter-league",
+  "leagueSlug": "venezuelan-winter-league",
+  "name": "Venezuelan Winter League",
+  "abbreviation": "VENWL",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "baseball",
+  "sportName": "Baseball",
+  "slug": "baseball/world-baseball-classic",
+  "leagueSlug": "world-baseball-classic",
+  "name": "World Baseball Classic",
+  "abbreviation": "WBBC",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-baseball.png",
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/fiba",
+  "leagueSlug": "fiba",
+  "name": "FIBA",
+  "abbreviation": "FIBA",
+  "logo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/fiba.png",
+  "logoDark": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500-dark/fiba.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-golden-state",
+  "leagueSlug": "nba-summer-golden-state",
+  "name": "Golden State Summer League",
+  "abbreviation": "NBAGS",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nba.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nba.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-las-vegas",
+  "leagueSlug": "nba-summer-las-vegas",
+  "name": "Las Vegas Summer League",
+  "abbreviation": "NBALV",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nba.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nba.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba",
+  "leagueSlug": "nba",
+  "name": "NBA",
+  "abbreviation": "NBA",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nba.png",
+  "logoDark": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500-dark/nba.png&w=500&h=500&transparent=true"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-california",
+  "leagueSlug": "nba-summer-california",
+  "name": "NBA California Classic Summer League",
+  "abbreviation": "NBACC",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-development",
+  "leagueSlug": "nba-development",
+  "name": "NBA G League",
+  "abbreviation": "NBA G League",
+  "logo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/nba_gleague.png",
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nbl",
+  "leagueSlug": "nbl",
+  "name": "NBL Australia",
+  "abbreviation": "NBL",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nbl.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nbl.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/mens-college-basketball",
+  "leagueSlug": "mens-college-basketball",
+  "name": "NCAA Men's Basketball",
+  "abbreviation": "NCAAM",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-basketball.png",
+  "logoDark": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-basketball.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/womens-college-basketball",
+  "leagueSlug": "womens-college-basketball",
+  "name": "NCAA Women's Basketball",
+  "abbreviation": "NCAAW",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-basketball.png",
+  "logoDark": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-basketball.png"
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/mens-olympics-basketball",
+  "leagueSlug": "mens-olympics-basketball",
+  "name": "Olympics Men's Basketball",
+  "abbreviation": "Olympics",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/womens-olympics-basketball",
+  "leagueSlug": "womens-olympics-basketball",
+  "name": "Olympics Women's Basketball",
+  "abbreviation": "Olympics",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-orlando",
+  "leagueSlug": "nba-summer-orlando",
+  "name": "Orlando Summer League",
+  "abbreviation": "NBAOR",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-sacramento",
+  "leagueSlug": "nba-summer-sacramento",
+  "name": "Sacramento Summer League",
+  "abbreviation": "NBAGS",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/nba-summer-utah",
+  "leagueSlug": "nba-summer-utah",
+  "name": "Salt Lake City Summer League",
+  "abbreviation": "NBAUT",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "basketball",
+  "sportName": "Basketball",
+  "slug": "basketball/wnba",
+  "leagueSlug": "wnba",
+  "name": "WNBA",
+  "abbreviation": "WNBA",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/wnba.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/wnba.png"
+ },
+ {
+  "sport": "field-hockey",
+  "sportName": "Field Hockey",
+  "slug": "field-hockey/womens-college-field-hockey",
+  "leagueSlug": "womens-college-field-hockey",
+  "name": "NCAA Women's Field Hockey",
+  "abbreviation": "CFHOC",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-field-hockey.png",
+  "logoDark": null
+ },
+ {
+  "sport": "football",
+  "sportName": "American Football",
+  "slug": "football/cfl",
+  "leagueSlug": "cfl",
+  "name": "CFL",
+  "abbreviation": "CFL",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "football",
+  "sportName": "American Football",
+  "slug": "football/college-football",
+  "leagueSlug": "college-football",
+  "name": "NCAA Football",
+  "abbreviation": "NCAAF",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-football-college.png",
+  "logoDark": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-football-college.png"
+ },
+ {
+  "sport": "football",
+  "sportName": "American Football",
+  "slug": "football/nfl",
+  "leagueSlug": "nfl",
+  "name": "NFL",
+  "abbreviation": "NFL",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nfl.png"
+ },
+ {
+  "sport": "football",
+  "sportName": "American Football",
+  "slug": "football/ufl",
+  "leagueSlug": "ufl",
+  "name": "UFL",
+  "abbreviation": "UFL",
+  "logo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/ufl.png",
+  "logoDark": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500-dark/ufl.png"
+ },
+ {
+  "sport": "football",
+  "sportName": "American Football",
+  "slug": "football/xfl",
+  "leagueSlug": "xfl",
+  "name": "XFL",
+  "abbreviation": "XFL",
+  "logo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/xfl.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/xfl.png"
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/olympics-mens-ice-hockey",
+  "leagueSlug": "olympics-mens-ice-hockey",
+  "name": "Men's Ice Hockey",
+  "abbreviation": "Men's Ice Hockey",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/mens-college-hockey",
+  "leagueSlug": "mens-college-hockey",
+  "name": "NCAA Men’s Hockey",
+  "abbreviation": "NCAAH",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-hockey.png",
+  "logoDark": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-hockey.png"
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/womens-college-hockey",
+  "leagueSlug": "womens-college-hockey",
+  "name": "NCAA Women's Hockey",
+  "abbreviation": "CWHOC",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-hockey.png",
+  "logoDark": null
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/nhl",
+  "leagueSlug": "nhl",
+  "name": "NHL",
+  "abbreviation": "NHL",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nhl.png",
+  "logoDark": "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nhl.png"
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/olympics-womens-ice-hockey",
+  "leagueSlug": "olympics-womens-ice-hockey",
+  "name": "Women's Ice Hockey",
+  "abbreviation": "Women's Ice Hockey",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "hockey",
+  "sportName": "Ice Hockey",
+  "slug": "hockey/hockey-world-cup",
+  "leagueSlug": "hockey-world-cup",
+  "name": "World Cup of Hockey",
+  "abbreviation": "WCH",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "lacrosse",
+  "sportName": "Lacrosse",
+  "slug": "lacrosse/nll",
+  "leagueSlug": "nll",
+  "name": "National Lacrosse League",
+  "abbreviation": "NLL",
+  "logo": "https://a.espncdn.com/guid/5f77fe12-e54f-41a1-904e-77135452f348/logos/default.png",
+  "logoDark": "https://a.espncdn.com/guid/5f77fe12-e54f-41a1-904e-77135452f348/logos/default-dark.png"
+ },
+ {
+  "sport": "lacrosse",
+  "sportName": "Lacrosse",
+  "slug": "lacrosse/mens-college-lacrosse",
+  "leagueSlug": "mens-college-lacrosse",
+  "name": "NCAA Men's Lacrosse",
+  "abbreviation": "NCAAM Lacrosse",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-lacrosse.png",
+  "logoDark": null
+ },
+ {
+  "sport": "lacrosse",
+  "sportName": "Lacrosse",
+  "slug": "lacrosse/womens-college-lacrosse",
+  "leagueSlug": "womens-college-lacrosse",
+  "name": "NCAA Women's Lacrosse",
+  "abbreviation": "NCAAW Lacrosse",
+  "logo": "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-lacrosse.png",
+  "logoDark": null
+ },
+ {
+  "sport": "lacrosse",
+  "sportName": "Lacrosse",
+  "slug": "lacrosse/pll",
+  "leagueSlug": "pll",
+  "name": "Premier Lacrosse League",
+  "abbreviation": "PLL",
+  "logo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/pll.png",
+  "logoDark": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500-dark/pll.png"
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289274",
+  "leagueSlug": "289274",
+  "name": "2020 Tri Nations",
+  "abbreviation": "2020 Tri Nations",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/236461",
+  "leagueSlug": "236461",
+  "name": "Anglo-Welsh Cup",
+  "abbreviation": "Anglo-Welsh Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/268565",
+  "leagueSlug": "268565",
+  "name": "British and Irish Lions Tour",
+  "abbreviation": "British and Irish Lions Tour",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/270555",
+  "leagueSlug": "270555",
+  "name": "Currie Cup",
+  "abbreviation": "Currie Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/272073",
+  "leagueSlug": "272073",
+  "name": "European Rugby Challenge Cup",
+  "abbreviation": "European Rugby Challenge Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/271937",
+  "leagueSlug": "271937",
+  "name": "European Rugby Champions Cup",
+  "abbreviation": "European Rugby Champions Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/270559",
+  "leagueSlug": "270559",
+  "name": "French Top 14",
+  "abbreviation": "TOP14",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/267979",
+  "leagueSlug": "267979",
+  "name": "Gallagher Prem",
+  "abbreviation": "Prem Rugby",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": "https://a.espncdn.com/guid/b207ec86-a61d-31fc-8834-4777d50755aa/logos/default-dark.png"
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289234",
+  "leagueSlug": "289234",
+  "name": "International Test Match",
+  "abbreviation": "International Test Match",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289262",
+  "leagueSlug": "289262",
+  "name": "Major League Rugby",
+  "abbreviation": "Major League Rugby",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/270563",
+  "leagueSlug": "270563",
+  "name": "Mitre 10 Cup",
+  "abbreviation": "National Provence Championship",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/17567",
+  "leagueSlug": "17567",
+  "name": "Nations Championship",
+  "abbreviation": "Nations Championship",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/282",
+  "leagueSlug": "282",
+  "name": "Olympic Men's 7s",
+  "abbreviation": "",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/283",
+  "leagueSlug": "283",
+  "name": "Olympic Women's Rugby Sevens",
+  "abbreviation": "OLYWRS",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/164205",
+  "leagueSlug": "164205",
+  "name": "Rugby World Cup",
+  "abbreviation": "Rugby World Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/180659",
+  "leagueSlug": "180659",
+  "name": "Six Nations",
+  "abbreviation": "Six Nations",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": "https://a.espncdn.com/guid/3c68c9b2-7e7c-3a78-9f96-cb954d22809d/logos/default-dark.png"
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289271",
+  "leagueSlug": "289271",
+  "name": "Super Rugby Aotearoa",
+  "abbreviation": "Super Rugby Aotearoa",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289272",
+  "leagueSlug": "289272",
+  "name": "Super Rugby AU",
+  "abbreviation": "Super Rugby AU",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/242041",
+  "leagueSlug": "242041",
+  "name": "Super Rugby Pacific",
+  "abbreviation": "Super Rugby Pacific",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289277",
+  "leagueSlug": "289277",
+  "name": "Super Rugby Trans-Tasman",
+  "abbreviation": "Super Rugby Trans-Tasman",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/244293",
+  "leagueSlug": "244293",
+  "name": "The Rugby Championship",
+  "abbreviation": "Rugby Championship",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/270557",
+  "leagueSlug": "270557",
+  "name": "United Rugby Championship",
+  "abbreviation": "United Rugby Championship",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/2009",
+  "leagueSlug": "2009",
+  "name": "URBA Primera A",
+  "abbreviation": "URBA Primera A",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289279",
+  "leagueSlug": "289279",
+  "name": "URBA Top 14",
+  "abbreviation": "URBA Top 14",
+  "logo": null,
+  "logoDark": null
+ },
+ {
+  "sport": "rugby",
+  "sportName": "Rugby Union",
+  "slug": "rugby/289237",
+  "leagueSlug": "289237",
+  "name": "Women's Rugby World Cup",
+  "abbreviation": "Women's Rugby World Cup",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-rugby.png",
+  "logoDark": null
+ },
+ {
+  "sport": "rugby-league",
+  "sportName": "Rugby League",
+  "slug": "rugby-league/3",
+  "leagueSlug": "3",
+  "name": "Rugby League",
+  "abbreviation": "NRL",
+  "logo": "https://a.espncdn.com/i/teamlogos/leagues/500/nrl.png",
+  "logoDark": null
+ },
+ {
+  "sport": "volleyball",
+  "sportName": "Volleyball",
+  "slug": "volleyball/mens-college-volleyball",
+  "leagueSlug": "mens-college-volleyball",
+  "name": "NCAA Men's Volleyball",
+  "abbreviation": "NCAA Men's Volleyball",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/sports-volleyball-solid.png",
+  "logoDark": null
+ },
+ {
+  "sport": "volleyball",
+  "sportName": "Volleyball",
+  "slug": "volleyball/womens-college-volleyball",
+  "leagueSlug": "womens-college-volleyball",
+  "name": "NCAA Women's Volleyball",
+  "abbreviation": "NCAA Women's Volleyball",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/sports-volleyball-solid.png",
+  "logoDark": null
+ },
+ {
+  "sport": "water-polo",
+  "sportName": "Water Polo",
+  "slug": "water-polo/mens-college-water-polo",
+  "leagueSlug": "mens-college-water-polo",
+  "name": "NCAA Men's Water Polo",
+  "abbreviation": "NCAAM Water Polo",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/sports-water-polo-solid.png",
+  "logoDark": null
+ },
+ {
+  "sport": "water-polo",
+  "sportName": "Water Polo",
+  "slug": "water-polo/womens-college-water-polo",
+  "leagueSlug": "womens-college-water-polo",
+  "name": "NCAA Women's Water Polo",
+  "abbreviation": "NCAAW Water Polo",
+  "logo": "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/sports-water-polo-solid.png",
+  "logoDark": null
+ }
+]

@@ -12,6 +12,18 @@ interface RawLeague {
   logoDark?: string | null;
 }
 
+/** Entry from data/sports.json — every non-football league. */
+interface RawSportLeague {
+  sport: string;
+  sportName: string;
+  slug: string;          // "basketball/nba"
+  leagueSlug: string;    // "nba"
+  name: string;
+  abbreviation: string | null;
+  logo: string | null;
+  logoDark: string | null;
+}
+
 /**
  * Display names for slug prefixes. ESPN uses FIFA-style codes (GER not DEU,
  * NED not NLD, RSA not ZAF), plus confederation and global pseudo-countries.
@@ -90,10 +102,12 @@ export function fotmobKeyFor(slug: string): string | null {
 
 const forcedTier1 = new Set(config.tier1Extra);
 
-export const LEAGUES: League[] = raw.map(r => {
+export const FOOTBALL_LEAGUES: League[] = raw.map(r => {
   const country = r.slug.split('.')[0] ?? r.slug;
   return {
     slug: r.slug,
+    sport: 'soccer',
+    sportName: 'Football',
     name: r.name,
     country,
     countryName: countryName(country),
@@ -108,12 +122,56 @@ export const LEAGUES: League[] = raw.map(r => {
   };
 });
 
+let rawSports: RawSportLeague[] = [];
+try {
+  rawSports = readJson<RawSportLeague[]>('sports.json');
+} catch {
+  console.warn('[catalog] no sports.json — run data/discover-sports.mjs');
+}
+
+/**
+ * Other sports.
+ *
+ * They earn a place only because their scoreboards return the same
+ * two-competitor shape as football, so the existing adapter reads them
+ * unchanged — see data/discover-sports.mjs.
+ */
+export const OTHER_SPORT_LEAGUES: League[] = rawSports.map(r => ({
+  slug: r.slug,
+  sport: r.sport,
+  sportName: r.sportName,
+  name: r.name,
+  country: r.sport,
+  countryName: r.sportName,
+  flag: null,
+  logo: r.logo,
+  logoDark: r.logoDark,
+  tier: 2 as const,
+}));
+
+export const LEAGUES: League[] = [...FOOTBALL_LEAGUES, ...OTHER_SPORT_LEAGUES];
+
+/** Sports the app can browse, with how many competitions each carries. */
+export const SPORTS = (() => {
+  const counts = new Map<string, { sport: string; name: string; leagues: number }>();
+  for (const l of LEAGUES) {
+    const hit = counts.get(l.sport) ?? { sport: l.sport, name: l.sportName, leagues: 0 };
+    hit.leagues += 1;
+    counts.set(l.sport, hit);
+  }
+  // Football first — it is the product; the rest alphabetical.
+  return [...counts.values()].sort((a, b) =>
+    a.sport === 'soccer' ? -1 : b.sport === 'soccer' ? 1 : a.name.localeCompare(b.name));
+})();
+
 export const LEAGUE_BY_SLUG = new Map(LEAGUES.map(l => [l.slug, l]));
 
 export function getLeague(slug: string): League {
   return (
     LEAGUE_BY_SLUG.get(slug) ?? {
       slug,
+      sport: slug.includes('/') ? (slug.split('/')[0] ?? 'soccer') : 'soccer',
+      sportName: 'Football',
       name: slug,
       country: slug.split('.')[0] ?? slug,
       countryName: countryName(slug.split('.')[0] ?? slug),

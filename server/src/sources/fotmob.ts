@@ -55,6 +55,9 @@ function leagueOf(raw: any): League {
 
   return {
     slug: `fotmob:${id}`,
+    // FotMob is football only; other sports come from ESPN.
+    sport: 'soccer',
+    sportName: 'Football',
     name: str(raw?.name) ?? `League ${id}`,
     country: cc || 'int',
     countryName: cc ? countryName(cc) : 'International',

@@ -22,8 +22,8 @@ interface State {
  * offline must degrade to stale, never to blank.
  */
 export function useMatches({
-  mode, date, leagues,
-}: { mode: 'day' | 'live'; date: string; leagues: string[] }) {
+  mode, date, leagues, sport = 'soccer',
+}: { mode: 'day' | 'live'; date: string; leagues: string[]; sport?: string }) {
   const [state, setState] = useState<State>({
     groups: [], loading: true, refreshing: false, error: null,
     hasData: false, lastLoadedAt: 0,
@@ -42,8 +42,8 @@ export function useMatches({
 
     try {
       const res = mode === 'live'
-        ? await api.live(leagues)
-        : await api.matches(date, leagues);
+        ? await api.live(leagues, sport)
+        : await api.matches(date, leagues, sport);
       if (id !== reqId.current) return;                 // a newer request won
       setState({
         groups: res.groups, loading: false, refreshing: false,
@@ -59,7 +59,7 @@ export function useMatches({
         error: e instanceof Error ? e.message : 'Network error',
       }));
     }
-  }, [mode, date, leagues.join(',')]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mode, date, sport, leagues.join(',')]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { void load(); }, [load]);
 

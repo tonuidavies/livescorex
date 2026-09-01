@@ -24,8 +24,16 @@ export interface Team {
 }
 
 export interface League {
-  /** ESPN-style slug, e.g. "ken.1", "eng.1", "uefa.champions" */
+  /**
+   * Canonical key. Football keeps the bare ESPN slug ("ken.1", "eng.1") for
+   * backwards compatibility; every other sport is namespaced by its own path
+   * ("basketball/nba"), which is also exactly what the upstream URL needs.
+   */
   slug: string;
+  /** ESPN sport path segment: "soccer", "basketball", "hockey"… */
+  sport: string;
+  /** Display name for the sport, e.g. "Ice Hockey". */
+  sportName: string;
   name: string;
   /** ISO-ish country/confederation code derived from the slug, e.g. "ken" */
   country: string;

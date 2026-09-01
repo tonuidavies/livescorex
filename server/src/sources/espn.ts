@@ -7,8 +7,19 @@ import { getJson } from '../util/http.js';
 import { getLeague } from '../catalog.js';
 import { config } from '../config.js';
 
-const SITE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
-const CORE = 'https://site.api.espn.com/apis/v2/sports/soccer';
+const SITE_ROOT = 'https://site.api.espn.com/apis/site/v2/sports';
+const CORE_ROOT = 'https://site.api.espn.com/apis/v2/sports';
+
+/**
+ * Split a canonical league slug into its upstream path.
+ *
+ * Football keeps the bare slug for backwards compatibility ("eng.1"), while
+ * every other sport is already namespaced by its own path
+ * ("basketball/nba") — which happens to be exactly what the URL wants.
+ */
+function pathFor(slug: string): string {
+  return slug.includes('/') ? slug : `soccer/${slug}`;
+}
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -633,7 +644,7 @@ export const espn: Source = {
    * silently renders a March match as if it were today.
    */
   async fetchLeagueDay(slug, yyyymmdd) {
-    const url = `${SITE}/${slug}/scoreboard?dates=${yyyymmdd}`;
+    const url = `${SITE_ROOT}/${pathFor(slug)}/scoreboard?dates=${yyyymmdd}`;
     const res = await getJson<any>(url);
     if (!res.ok) return null;
     if (res.notModified) return [];          // caller keeps its copy
@@ -657,7 +668,8 @@ export const espn: Source = {
 
   async fetchDetail(slug, matchId) {
     const id = matchId.replace(/^espn:/, '');
-    const res = await getJson<any>(`${SITE}/${slug}/summary?event=${id}`, { conditional: false });
+    const res = await getJson<any>(
+      `${SITE_ROOT}/${pathFor(slug)}/summary?event=${id}`, { conditional: false });
     if (!res.ok || !res.data) return null;
     const s = res.data;
 
@@ -732,7 +744,7 @@ export const espn: Source = {
   },
 
   async fetchStandings(slug) {
-    const res = await getJson<any>(`${CORE}/${slug}/standings`);
+    const res = await getJson<any>(`${CORE_ROOT}/${pathFor(slug)}/standings`);
     if (!res.ok || !res.data) return null;
     const children: any[] = Array.isArray(res.data?.children) ? res.data.children : [];
     const entries: any[] =

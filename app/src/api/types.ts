@@ -6,8 +6,18 @@ export type MatchState =
 
 export interface Team { id: string; name: string; shortName: string; crest: string | null }
 
+export interface Sport {
+  sport: string;
+  name: string;
+  leagues: number;
+}
+
 export interface League {
-  slug: string; name: string; country: string; countryName: string;
+  slug: string;
+  /** ESPN sport path segment: "soccer", "basketball", … */
+  sport: string;
+  sportName: string;
+  name: string; country: string; countryName: string;
   flag: string | null;
   logo: string | null;
   /** Light-on-dark variant for dark themes. */

@@ -13,6 +13,7 @@ import { TopBar } from '../components/TopBar';
 import { SideBar } from '../components/SideBar';
 import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/StateViews';
 import { SelectionBar } from '../components/SelectionBar';
+import { SportBanner } from '../components/SportBanner';
 import { useNowTicker } from '../util/useMatchClock';
 import { useOnline } from '../util/useOnline';
 import { freshness } from '../util/freshness';
@@ -48,7 +49,7 @@ export function MatchesScreen({ navigation }: Props) {
 
   const leagues = onlyMine ? prefs.leagues : [];
   const { groups, loading, refreshing, error, hasData, conn, reload, lastHeardAt } =
-    useMatches({ mode: 'day', date, leagues });
+    useMatches({ mode: 'day', date, leagues, sport: prefs.sport });
 
   const anyLive = groups.some(g => g.matches.some(m => m.state === 'live'));
   const now = useNowTicker(anyLive);
@@ -79,6 +80,8 @@ export function MatchesScreen({ navigation }: Props) {
       />
 
       <DateStrip selected={date} onSelect={setDate} />
+
+      <SportBanner onOpenMenu={() => setMenu(true)} />
 
       {selecting ? (
         <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />

@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import type {
-  LeagueGroup, MatchDetail, MatchesResponse, Standings, League,
+  LeagueGroup, MatchDetail, MatchesResponse, Standings, League, Sport,
 } from './types';
 
 /**
@@ -75,17 +75,24 @@ async function get<T>(path: string, timeoutMs = 12_000): Promise<T> {
 }
 
 export const api = {
-  leagues: () =>
-    get<{ leagues: League[]; defaults: string[]; oddsEnabled: boolean }>('/v1/leagues'),
+  sports: () => get<{ sports: Sport[] }>('/v1/sports'),
 
-  matches: (date: string, leagues?: string[]) => {
-    const q = new URLSearchParams({ date });
+  leagues: (sport?: string) => {
+    const q = new URLSearchParams();
+    if (sport) q.set('sport', sport);
+    return get<{
+      leagues: League[]; sports: Sport[]; defaults: string[]; oddsEnabled: boolean;
+    }>(`/v1/leagues?${q}`);
+  },
+
+  matches: (date: string, leagues?: string[], sport = 'soccer') => {
+    const q = new URLSearchParams({ date, sport });
     if (leagues?.length) q.set('leagues', leagues.join(','));
     return get<MatchesResponse>(`/v1/matches?${q}`);
   },
 
-  live: (leagues?: string[]) => {
-    const q = new URLSearchParams();
+  live: (leagues?: string[], sport = 'soccer') => {
+    const q = new URLSearchParams({ sport });
     if (leagues?.length) q.set('leagues', leagues.join(','));
     return get<{ groups: LeagueGroup[]; serverTime: number }>(`/v1/live?${q}`);
   },

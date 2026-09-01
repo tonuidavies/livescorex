@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { store } from '../core/store.js';
-import { LEAGUES, DEFAULT_LEAGUES } from '../catalog.js';
+import { LEAGUES, DEFAULT_LEAGUES, SPORTS } from '../catalog.js';
 import type { Scheduler } from '../core/scheduler.js';
 import { dayKey } from '../core/scheduler.js';
 import { config } from '../config.js';
@@ -93,9 +93,18 @@ export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
         });
       }
 
+      if (p === '/v1/sports') {
+        return json(res, 200, { sports: SPORTS }, 3600);
+      }
+
       if (p === '/v1/leagues') {
+        // Football is 259 competitions on its own, so the catalogue is
+        // filtered server-side rather than shipping all 333 to be sifted.
+        const sport = url.searchParams.get('sport');
+        const leagues = sport ? LEAGUES.filter(l => l.sport === sport) : LEAGUES;
         return json(res, 200, {
-          leagues: LEAGUES,
+          leagues,
+          sports: SPORTS,
           defaults: DEFAULT_LEAGUES,
           oddsEnabled: config.oddsEnabled,
         }, 3600);
@@ -108,14 +117,21 @@ export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
         const date = url.searchParams.get('date') ?? dayKey();
         const filter = url.searchParams.get('leagues');
         const wanted = filter ? new Set(filter.split(',').filter(Boolean)) : null;
+        // Defaults to football: mixing NBA fixtures into a football list is
+        // not what anyone opening a scores app is asking for.
+        const sport = url.searchParams.get('sport') ?? 'soccer';
 
         // Any date the sweep has not reached is fetched now rather than
         // answered with an empty list.
-        await sched.ensureDay(date, wanted ? [...wanted] : undefined);
+        await sched.ensureDay(
+          date,
+          wanted ? [...wanted] : LEAGUES.filter(l => l.sport === sport).map(l => l.slug),
+        );
 
         const groups = store
           .getDay(date)
           .filter(g => g.matches.length > 0)
+          .filter(g => g.matches[0]!.league.sport === sport)
           .filter(g => !wanted || wanted.has(g.matches[0]!.league.slug))
           .map(g => ({
             league: g.matches[0]!.league,
@@ -135,8 +151,10 @@ export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
       if (p === '/v1/live') {
         const filter = url.searchParams.get('leagues');
         const wanted = filter ? new Set(filter.split(',').filter(Boolean)) : null;
+        const sport = url.searchParams.get('sport') ?? 'soccer';
 
         const live = store.liveMatches()
+          .filter(m => m.league.sport === sport)
           .filter(m => !wanted || wanted.has(m.league.slug));
 
         const bySlug = new Map<string, typeof live>();
