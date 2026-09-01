@@ -9,6 +9,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, tabular, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { statusCell } from '../util/format';
+import { serverNow } from '../util/serverClock';
 import { Crest } from './Crest';
 import { Star } from './Star';
 
@@ -34,7 +35,7 @@ export const MatchRow = memo(function MatchRow({
   goalAt?: number;
 }) {
   const { colors } = useTheme();
-  const status = statusCell(match, now ?? Date.now());
+  const status = statusCell(match, now ?? serverNow());
   const live = status.tone === 'live';
   const played = match.score.home !== null && match.score.away !== null;
 

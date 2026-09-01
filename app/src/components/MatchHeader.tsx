@@ -7,6 +7,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { space, tabular, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { kickoffTime, longDate, statusCell } from '../util/format';
+import { serverNow } from '../util/serverClock';
 import { matchClock } from '../util/useMatchClock';
 import { Crest, LeagueCrest } from './Crest';
 import { Star } from './Star';
@@ -30,7 +31,7 @@ export function MatchHeader({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const tick = now ?? Date.now();
+  const tick = now ?? serverNow();
   const status = statusCell(match, tick);
   const played = match.score.home !== null && match.score.away !== null;
   const live = match.state === 'live' || match.state === 'halftime';

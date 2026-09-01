@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import type {
   LeagueGroup, MatchDetail, MatchesResponse, Standings, League, Sport,
 } from './types';
+import { observeServerTime } from '../util/serverClock';
 
 /**
  * Where the API lives.
@@ -62,13 +63,18 @@ export class ApiError extends Error {
 async function get<T>(path: string, timeoutMs = 12_000): Promise<T> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  const sentAt = Date.now();
   try {
     const res = await fetch(`${getApiUrl()}${path}`, {
       signal: ctrl.signal,
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) throw new ApiError(`GET ${path} failed`, res.status);
-    return (await res.json()) as T;
+    const body = (await res.json()) as T;
+    // Every response that carries the server's clock is a free skew sample.
+    const st = (body as { serverTime?: number } | null)?.serverTime;
+    if (typeof st === 'number') observeServerTime(st, sentAt, Date.now());
+    return body;
   } finally {
     clearTimeout(timer);
   }
@@ -76,6 +82,13 @@ async function get<T>(path: string, timeoutMs = 12_000): Promise<T> {
 
 export const api = {
   sports: () => get<{ sports: Sport[] }>('/v1/sports'),
+
+  /** Where to send someone who picked an out-of-season sport. */
+  nextFixtures: (sport: string, from: string) =>
+    get<{ next: { day: string; count: number; league: string } | null }>(
+      `/v1/next-fixtures?sport=${sport}&from=${from}`,
+      30_000,
+    ),
 
   leagues: (sport?: string) => {
     const q = new URLSearchParams();

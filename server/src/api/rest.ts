@@ -93,6 +93,14 @@ export function createRestHandler(sched: Scheduler, notifier?: NotifierLike) {
         });
       }
 
+      /* Where to send someone who picked an out-of-season sport. */
+      if (p === '/v1/next-fixtures') {
+        const sport = url.searchParams.get('sport') ?? 'soccer';
+        const from = url.searchParams.get('from') ?? dayKey();
+        const hit = await sched.nextFixtureDay(sport, from);
+        return json(res, 200, { next: hit });
+      }
+
       if (p === '/v1/sports') {
         return json(res, 200, { sports: SPORTS }, 3600);
       }

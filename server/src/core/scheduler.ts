@@ -403,6 +403,61 @@ export class Scheduler {
     };
   }
 
+  /**
+   * The nearest day from `from` that actually has fixtures for a sport.
+   *
+   * Out-of-season sports are the normal case, not the exception: on the first
+   * of September the NBA, NFL and NHL all have nothing for weeks. Without
+   * this the app answers a sport switch with a blank screen, which reads as a
+   * broken app rather than as a closed season.
+   *
+   * Days already in the store are checked first and cost nothing; only if none
+   * of those has anything does it fetch, one day at a time, stopping at the
+   * first hit.
+   */
+  async nextFixtureDay(
+    sport: string,
+    from: string,
+    horizon = 10,
+  ): Promise<{ day: string; count: number; league: string } | null> {
+    const slugs = LEAGUES.filter(l => l.sport === sport).map(l => l.slug);
+    if (slugs.length === 0) return null;
+
+    const fromMs = Date.parse(
+      `${from.slice(0, 4)}-${from.slice(4, 6)}-${from.slice(6, 8)}T00:00:00Z`,
+    );
+    if (!Number.isFinite(fromMs)) return null;
+
+    const inspect = (day: string) => {
+      let count = 0;
+      let league = '';
+      for (const slug of slugs) {
+        const state = store.getLeagueDay(day, slug);
+        if (!state?.matches.length) continue;
+        count += state.matches.length;
+        if (!league) league = state.matches[0]!.league.name;
+      }
+      return count > 0 ? { day, count, league } : null;
+    };
+
+    // Pass one: whatever is already loaded.
+    for (let i = 1; i <= horizon; i++) {
+      const day = dayKey(fromMs + i * 86_400_000);
+      const hit = inspect(day);
+      if (hit) return hit;
+    }
+
+    // Pass two: fetch forward, stopping at the first day with anything. Small
+    // sports are a handful of leagues, so this stays quick.
+    for (let i = 1; i <= horizon; i++) {
+      const day = dayKey(fromMs + i * 86_400_000);
+      await this.ensureDay(day, slugs);
+      const hit = inspect(day);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
   /** Exposed so the REST layer can lazily fill standings on first request. */
   async ensureStandings(slug: string): Promise<void> {
     const existing = store.getStandings(slug);

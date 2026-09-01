@@ -14,6 +14,7 @@ import { SideBar } from '../components/SideBar';
 import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/StateViews';
 import { SelectionBar } from '../components/SelectionBar';
 import { SportBanner } from '../components/SportBanner';
+import { NextFixturesHint } from '../components/NextFixturesHint';
 import { useNowTicker } from '../util/useMatchClock';
 import { useOnline } from '../util/useOnline';
 import { freshness } from '../util/freshness';
@@ -131,14 +132,23 @@ export function MatchesScreen({ navigation }: Props) {
                 onAction={() => navigation.navigate('Leagues')}
               />
             ) : (
-              <EmptyState
-                title="No matches on this day"
-                subtitle={
-                  onlyMine
-                    ? `Nothing scheduled in your ${prefs.leagues.length} leagues. Tap ALL to see every competition.`
-                    : 'Nothing scheduled anywhere on this date.'
-                }
-              />
+              <View>
+                <EmptyState
+                  title="No matches on this day"
+                  subtitle={
+                    onlyMine
+                      ? `Nothing scheduled in your ${prefs.leagues.length} leagues. Tap ALL to see every competition.`
+                      : 'Nothing scheduled on this date.'
+                  }
+                />
+                {/* Out-of-season sports are normal, not an error — point at
+                    the next day that actually has something. */}
+                <NextFixturesHint
+                  sport={prefs.sport}
+                  from={date}
+                  onJump={setDate}
+                />
+              </View>
             )
           }
         />

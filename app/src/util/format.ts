@@ -1,5 +1,6 @@
 import type { Match } from '../api/types';
 import { matchClock } from './useMatchClock';
+import { serverNow } from './serverClock';
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
 
@@ -45,7 +46,7 @@ export const isPlayed = (m: Match) => m.state === 'finished';
  *  interpolated clock; pass Date.now() when you have no ticker. */
 export function statusCell(
   m: Match,
-  now: number = Date.now(),
+  now: number = serverNow(),
 ): { text: string; tone: 'live' | 'muted' | 'normal' } {
   if (m.state === 'live') {
     const c = matchClock(m, now);

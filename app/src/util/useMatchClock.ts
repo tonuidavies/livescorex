@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Match } from '../api/types';
+import { serverNow } from './serverClock';
 
 /**
  * The displayed match clock.
@@ -64,11 +65,13 @@ export function displayMinute(m: Match, now: number): number | null {
  * renders.
  */
 export function useNowTicker(active: boolean, intervalMs = 1000): number {
-  const [now, setNow] = useState(() => Date.now());
+  // Ticks on the server's clock: `clockAsOf` is a server timestamp, so
+  // interpolating against the device's own clock would bake in any skew.
+  const [now, setNow] = useState(() => serverNow());
   useEffect(() => {
     if (!active) return;
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), intervalMs);
+    setNow(serverNow());
+    const t = setInterval(() => setNow(serverNow()), intervalMs);
     return () => clearInterval(t);
   }, [active, intervalMs]);
   return now;
