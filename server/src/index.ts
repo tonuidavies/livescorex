@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { config } from './config.js';
 import { espn } from './sources/espn.js';
+import { fotmob } from './sources/fotmob.js';
 import { Scheduler } from './core/scheduler.js';
 import { createRestHandler } from './api/rest.js';
 import { attachWebSocket } from './api/ws.js';
@@ -14,7 +15,12 @@ import { Notifier } from './push/notifier.js';
  * Zimbabwe. Add a paid adapter (api-football, Sportmonks) as the last entry
  * and it becomes the floor that stops the app ever going fully dark.
  */
-const sched = new Scheduler([espn]);
+/**
+ * Source order is fallback order for detail lookups. Live slates are merged
+ * on merit rather than by position — see core/merge.ts — so listing ESPN
+ * first never costs a match its second-level clock.
+ */
+const sched = new Scheduler([espn, fotmob]);
 const notifier = new Notifier();
 
 const server = createServer(createRestHandler(sched, notifier));

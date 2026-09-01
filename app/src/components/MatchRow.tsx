@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  useAnimatedStyle, useSharedValue, withSequence, withTiming,
+  Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t, font } from '../theme';
@@ -62,7 +62,14 @@ export const MatchRow = memo(function MatchRow({
       }
     >
       <View style={[styles.statusCell, { borderRightColor: colors.divider }]}>
-        <Text style={[t.label, { color: statusColor }]} numberOfLines={1}>
+        {live ? <LivePulse color={colors.liveBright} /> : null}
+        <Text
+          style={[
+            t.label,
+            { color: statusColor, fontVariant: ['tabular-nums'] },
+          ]}
+          numberOfLines={1}
+        >
           {status.text}
         </Text>
       </View>
@@ -106,6 +113,29 @@ export const MatchRow = memo(function MatchRow({
     </Pressable>
   );
 });
+
+/**
+ * Slow breathing dot beside a live minute.
+ *
+ * A static row gives no sign that the number is going to change on its own;
+ * this is the cheapest possible signal that the row is alive, and it is slow
+ * enough not to become the thing you look at.
+ */
+function LivePulse({ color }: { color: string }) {
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.25, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      false,
+    );
+  }, [opacity]);
+  const anim = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return <Animated.View style={[styles.pulse, { backgroundColor: color }, anim]} />;
+}
 
 function TeamLine({ name, crest, dim }: { name: string; crest: string | null; dim: boolean }) {
   const { colors } = useTheme();
@@ -172,7 +202,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRightWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: space.xs,
+    gap: 4,
   },
+  pulse: { width: 5, height: 5, borderRadius: 3 },
   teams: { flex: 1, justifyContent: 'center', paddingVertical: space.sm, paddingLeft: space.md, gap: 6 },
   teamLine: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   scores: { width: 34, justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: space.sm },

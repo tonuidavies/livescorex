@@ -150,7 +150,14 @@ export function MatchDetailScreen({ route, navigation }: Props) {
           detail.events.length > 0
             ? <Timeline events={detail.events} />
             : detail.lineups
-              ? <Pitch home={detail.lineups.home} away={detail.lineups.away} homeColor={colors.accent} awayColor="#3E6DD1" />
+              ? <Pitch
+                  home={detail.lineups.home}
+                  away={detail.lineups.away}
+                  homeColor={colors.accent}
+                  awayColor="#3E6DD1"
+                  homeName={m.home.name}
+                  awayName={m.away.name}
+                />
               : <EmptyState icon="time-outline" title="No timeline yet" subtitle="Events appear here once the match kicks off." />
         )}
 
@@ -165,6 +172,8 @@ export function MatchDetailScreen({ route, navigation }: Props) {
               away={detail.lineups.away}
               homeColor={colors.accent}
               awayColor="#3E6DD1"
+              homeName={m.home.name}
+              awayName={m.away.name}
             />
             {!detail.lineups.home.hasPitchPositions ? (
               <Text style={[t.caption, styles.note, { color: colors.textDim }]}>

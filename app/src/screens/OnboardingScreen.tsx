@@ -68,9 +68,8 @@ export function OnboardingScreen({ navigation }: Props) {
             Welcome to{'\n'}LivescoreX
           </Text>
           <Text style={[t.body, { color: colors.textMuted, textAlign: 'center', marginTop: space.lg, maxWidth: width * 0.8 }]}>
-            Live scores from 259 competitions — including the Kenyan Premier
-            League, Nigeria, Ghana and Uganda. Real-time updates and
-            unforgettable moments.
+            Second-by-second scores from close to 700 competitions — the
+            Kenyan Premier League and the Champions League alike.
           </Text>
         </View>
 

@@ -135,6 +135,12 @@ function normaliseMatch(slug: string, ev: any): Match | null {
     state,
     minute,
     minuteAsOf: minute === null ? null : Date.now(),
+    // ESPN publishes whole minutes only — no second-level clock to carry, so
+    // the client falls back to interpolating from `minuteAsOf`.
+    clockSeconds: null,
+    clockAsOf: null,
+    clockRunning: state === 'live',
+    addedTime: null,
     statusLabel: str(status?.type?.shortDetail) ?? str(status?.type?.detail) ?? '',
     home: team(homeC),
     away: team(awayC),
@@ -284,13 +290,25 @@ function normaliseLineup(rosterEntry: any): TeamLineup {
       starter: Boolean(p?.starter),
       x: slot ? slot.x : null,
       y: slot ? slot.y : null,
+      // ESPN publishes no player rating for football.
+      rating: null,
+      motm: false,
+      goals: 0,
+      assists: 0,
       yellow: hasCard('yellow'),
       red: hasCard('red'),
       subbedOff: Boolean(p?.subbedOut),
     };
   });
 
-  return { formation, players, hasPitchPositions: anyPositioned };
+  return {
+    formation,
+    players,
+    hasPitchPositions: anyPositioned,
+    // Neither the summary nor the team resource carries a coach for football.
+    coach: null,
+    rating: null,
+  };
 }
 
 /* ------------------------------------------------------------------ stats */
@@ -376,7 +394,12 @@ function normaliseStats(boxscore: any): TeamStat[] {
       else share = 0.5;
     }
 
-    out.push({ key: def.key, label: def.label, home: fmt(hn), away: fmt(an), homeShare: share });
+    out.push({
+      key: def.key, label: def.label,
+      home: fmt(hn), away: fmt(an),
+      homeShare: share,
+      group: null,   // ESPN publishes a flat list, not grouped sections
+    });
   }
   return out;
 }
@@ -552,6 +575,10 @@ function normaliseSeriesEvent(slug: string, e: any): Match | null {
     state,
     minute: null,
     minuteAsOf: null,
+    clockSeconds: null,
+    clockAsOf: null,
+    clockRunning: false,
+    addedTime: null,
     statusLabel: str(type?.shortDetail) ?? str(type?.detail) ?? 'FT',
     home: team(homeC),
     away: team(awayC),
@@ -577,8 +604,11 @@ function normaliseInfo(gameInfo: any, comp: any): MatchInfo {
     venue: str(venue?.fullName),
     city: str(venue?.address?.city),
     country: str(venue?.address?.country),
+    capacity: null,
     attendance: int(gameInfo?.attendance) || null,
     referee: str(ref?.displayName) ?? str(ref?.fullName),
+    homeCoach: null,
+    awayCoach: null,
     officials: officials
       .filter(o => o !== ref)
       .map(o => {
@@ -594,6 +624,7 @@ function normaliseInfo(gameInfo: any, comp: any): MatchInfo {
 
 export const espn: Source = {
   name: 'espn',
+  supportsLeagueDay: true,
 
   /**
    * The `dates` parameter is mandatory, not optional. A bare scoreboard call

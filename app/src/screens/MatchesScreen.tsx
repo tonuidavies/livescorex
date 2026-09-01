@@ -15,6 +15,7 @@ import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/
 import { SelectionBar } from '../components/SelectionBar';
 import { useNowTicker } from '../util/useMatchClock';
 import { useOnline } from '../util/useOnline';
+import { freshness } from '../util/freshness';
 import type { TabScreenProps } from '../navigation/types';
 import type { Match } from '../api/types';
 
@@ -35,9 +36,17 @@ export function MatchesScreen({ navigation }: Props) {
   const [date, setDate] = useState(() => dayKeyUTC(new Date()));
   const [menu, setMenu] = useState(false);
   const [selecting, setSelecting] = useState(false);
+  /**
+   * Every competition by default.
+   *
+   * The followed-leagues filter made the app feel empty for anyone who had not
+   * curated it, and hid exactly the obscure fixtures that make a scores app
+   * worth opening. The filter is still one tap away for people who want it.
+   */
+  const [onlyMine, setOnlyMine] = useState(false);
   const online = useOnline();
 
-  const leagues = prefs.leagues;
+  const leagues = onlyMine ? prefs.leagues : [];
   const { groups, loading, refreshing, error, hasData, conn, reload, lastLoadedAt } =
     useMatches({ mode: 'day', date, leagues });
 
@@ -49,8 +58,7 @@ export function MatchesScreen({ navigation }: Props) {
     [groups],
   );
 
-  const anyStale = groups.some(g => g.stale);
-  const oldestFetch = groups.length ? Math.min(...groups.map(g => g.fetchedAt)) : Date.now();
+  const fresh = freshness(groups, conn, online, lastLoadedAt);
 
   const openMatch = useCallback((m: Match) => {
     navigation.navigate('MatchDetail', { matchId: m.id, leagueSlug: m.league.slug });
@@ -64,8 +72,9 @@ export function MatchesScreen({ navigation }: Props) {
         onSort={() => navigation.navigate('Leagues')}
         onSettings={() => navigation.navigate('Settings')}
         onProfile={() => navigation.navigate('Profile')}
-        liveActive={false}
-        onToggleLive={() => navigation.navigate('Live')}
+        liveActive={onlyMine}
+        onToggleLive={() => setOnlyMine(v => !v)}
+        liveLabel={onlyMine ? 'MINE' : 'ALL'}
         connState={conn}
       />
 
@@ -75,13 +84,7 @@ export function MatchesScreen({ navigation }: Props) {
         <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />
       ) : null}
 
-      {(!online || anyStale || conn === 'offline' || (error && hasData)) ? (
-        <StaleBanner
-          fetchedAt={oldestFetch || lastLoadedAt || Date.now()}
-          offline={!online}
-          disconnected={conn === 'offline'}
-        />
-      ) : null}
+      <StaleBanner state={fresh} />
 
       {loading && !hasData ? (
         <View style={{ paddingTop: space.lg }}><RowSkeleton /></View>
@@ -115,18 +118,22 @@ export function MatchesScreen({ navigation }: Props) {
             />
           )}
           ListEmptyComponent={
-            leagues.length === 0 ? (
+            onlyMine && prefs.leagues.length === 0 ? (
               <EmptyState
                 icon="funnel-outline"
                 title="No leagues followed yet"
-                subtitle="Pick the competitions you care about and they'll show up here."
+                subtitle="Follow a few competitions, or tap ALL to see everything."
                 actionLabel="Browse leagues"
                 onAction={() => navigation.navigate('Leagues')}
               />
             ) : (
               <EmptyState
                 title="No matches on this day"
-                subtitle={`Nothing scheduled in your ${leagues.length} leagues. Try another date, or follow more from the menu.`}
+                subtitle={
+                  onlyMine
+                    ? `Nothing scheduled in your ${prefs.leagues.length} leagues. Tap ALL to see every competition.`
+                    : 'Nothing scheduled anywhere on this date.'
+                }
               />
             )
           }

@@ -22,11 +22,26 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
  * with jitter so a struggling upstream is never hammered. Most blocking is
  * earned; being genuinely light usually means never earning it.
  */
+/**
+ * Some upstreams serve browser traffic only and refuse a bare product token.
+ * That is a header expectation, not a challenge to defeat — where an upstream
+ * blocks by TLS fingerprint rather than headers there is no polite way in and
+ * the adapter simply is not built.
+ */
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+
 export async function getJson<T>(
   url: string,
-  opts: { timeoutMs?: number; retries?: number; conditional?: boolean } = {},
+  opts: {
+    timeoutMs?: number;
+    retries?: number;
+    conditional?: boolean;
+    browserLike?: boolean;
+  } = {},
 ): Promise<FetchResult<T>> {
-  const { timeoutMs = 15_000, retries = 2, conditional = true } = opts;
+  const { timeoutMs = 15_000, retries = 2, conditional = true, browserLike = false } = opts;
   let lastStatus = 0;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -34,11 +49,15 @@ export async function getJson<T>(
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
       const headers: Record<string, string> = {
-        'User-Agent': userAgent,
+        'User-Agent': browserLike ? BROWSER_UA : userAgent,
         'Accept': 'application/json',
         'Accept-Encoding': 'gzip, deflate',
         'X-Contact': config.contactUrl,
       };
+      if (browserLike) {
+        headers['Accept-Language'] = 'en-US,en;q=0.9';
+        headers['Referer'] = 'https://www.fotmob.com/';
+      }
       const prev = conditional ? etags.get(url) : undefined;
       if (prev) headers['If-None-Match'] = prev;
 

@@ -8,11 +8,11 @@ import type { MatchInfo as Info } from '../api/types';
 /**
  * Match context: where it is being played, who is officiating, how many came.
  *
- * Coaches and injury lists were asked for and are not here — ESPN publishes
- * neither for football. Its per-team injuries endpoint returns an empty set for
- * every soccer league checked, and no coach appears on either the summary or
- * the team resource. Filling this block with a second provider is the fix; an
- * empty "Coaches" heading would just look broken.
+ * Coaches arrive from the source that publishes them and are simply absent for
+ * competitions covered only by the one that does not — the block renders what
+ * exists rather than showing empty headings.
+ *
+ * Injury lists are still unavailable from either source.
  */
 export function MatchInfoCard({ info }: { info: Info }) {
   const { colors } = useTheme();
@@ -22,9 +22,16 @@ export function MatchInfoCard({ info }: { info: Info }) {
     const where = [info.city, info.country].filter(Boolean).join(', ');
     rows.push({ icon: 'location-outline', label: 'Stadium', value: where ? `${info.venue}, ${where}` : info.venue });
   }
+  if (info.homeCoach) rows.push({ icon: 'clipboard-outline', label: 'Home coach', value: info.homeCoach });
+  if (info.awayCoach) rows.push({ icon: 'clipboard-outline', label: 'Away coach', value: info.awayCoach });
   if (info.referee) rows.push({ icon: 'person-outline', label: 'Referee', value: info.referee });
   if (info.attendance) {
-    rows.push({ icon: 'people-outline', label: 'Attendance', value: info.attendance.toLocaleString() });
+    const cap = info.capacity
+      ? `${info.attendance.toLocaleString()} of ${info.capacity.toLocaleString()}`
+      : info.attendance.toLocaleString();
+    rows.push({ icon: 'people-outline', label: 'Attendance', value: cap });
+  } else if (info.capacity) {
+    rows.push({ icon: 'people-outline', label: 'Capacity', value: info.capacity.toLocaleString() });
   }
   for (const o of info.officials.slice(0, 3)) {
     rows.push({ icon: 'flag-outline', label: 'Official', value: o });

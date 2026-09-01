@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, renameSync } from 'node:fs';
 import type { Delta, Match, MatchDetail, Standings } from './schema.js';
 import { diffMatch } from './diff.js';
+import { mergeMatches } from './merge.js';
 import { config } from '../config.js';
 
 export interface LeagueDayState {
@@ -12,7 +13,13 @@ export interface LeagueDayState {
 }
 
 interface Snapshot {
-  version: 1;
+  /**
+   * Bumped whenever the Match shape changes. A snapshot written by an older
+   * build lacks fields the current code reads, and `undefined` flows straight
+   * through a `!== null` guard into NaN arithmetic — so an incompatible
+   * snapshot is discarded rather than half-loaded.
+   */
+  version: 2;
   savedAt: number;
   days: Record<string, Record<string, LeagueDayState>>;
   standings: Record<string, Standings>;
@@ -93,9 +100,52 @@ export class Store {
 
   /**
    * Replace one league's slate for one day and broadcast what changed.
-   * Returns the deltas so callers can log volume.
+   *
+   * `sourceName` scopes the write: each source owns its own view of a
+   * league-day, and the merged view is computed from all of them. Without that
+   * scoping the two sources would overwrite each other every poll cycle and
+   * the slate would flap between them.
    */
-  applyLeagueDay(dayKey: string, slug: string, matches: Match[]): Delta[] {
+  applyLeagueDay(dayKey: string, slug: string, matches: Match[], sourceName = 'espn'): Delta[] {
+    const bySource = this.sourceDays.get(dayKey) ?? new Map<string, Map<string, Match[]>>();
+    const forSource = bySource.get(sourceName) ?? new Map<string, Match[]>();
+    forSource.set(slug, matches);
+    bySource.set(sourceName, forSource);
+    this.sourceDays.set(dayKey, bySource);
+
+    const merged = this.mergeLeagueDay(dayKey, slug);
+    return this.commitLeagueDay(dayKey, slug, merged);
+  }
+
+  /** Per-source raw slates: dayKey -> source -> leagueSlug -> matches. */
+  private sourceDays = new Map<string, Map<string, Map<string, Match[]>>>();
+
+  private mergeLeagueDay(dayKey: string, slug: string): Match[] {
+    const bySource = this.sourceDays.get(dayKey);
+    if (!bySource) return [];
+    const lists: Match[][] = [];
+    for (const forSource of bySource.values()) {
+      const list = forSource.get(slug);
+      if (list?.length) lists.push(list);
+    }
+    if (lists.length === 0) return [];
+    if (lists.length === 1) return lists[0]!;
+
+    const { matches, aliases } = mergeMatches(lists);
+    for (const [canonical, ids] of aliases) {
+      for (const id of ids) if (id !== canonical) this.alias.set(id, canonical);
+    }
+    return matches;
+  }
+
+  /** Source-native id -> canonical id, so a stale link still resolves. */
+  private alias = new Map<string, string>();
+
+  resolveId(id: string): string {
+    return this.alias.get(id) ?? id;
+  }
+
+  private commitLeagueDay(dayKey: string, slug: string, matches: Match[]): Delta[] {
     let day = this.days.get(dayKey);
     if (!day) { day = new Map(); this.days.set(dayKey, day); }
 
@@ -117,6 +167,11 @@ export class Store {
     day.set(slug, { matches, fetchedAt: Date.now(), stale: false });
     if (deltas.length) this.broadcast(deltas);
     return deltas;
+  }
+
+  /** Which league-days a source currently holds, for targeted re-merges. */
+  sourceSlugs(dayKey: string, sourceName: string): string[] {
+    return [...(this.sourceDays.get(dayKey)?.get(sourceName)?.keys() ?? [])];
   }
 
   /**
@@ -150,13 +205,20 @@ export class Store {
   private load(): void {
     try {
       const snap = JSON.parse(readFileSync(config.snapshotPath, 'utf8')) as Snapshot;
-      if (snap.version !== 1) return;
+      if (snap.version !== 2) {
+        console.log('[store] snapshot version mismatch — starting fresh');
+        return;
+      }
       for (const [dayKey, leagues] of Object.entries(snap.days ?? {})) {
         const day = new Map<string, LeagueDayState>();
         for (const [slug, state] of Object.entries(leagues)) {
-          // Anything restored from disk is by definition unconfirmed.
-          day.set(slug, { ...state, stale: true });
-          for (const m of state.matches) this.byId.set(m.id, m);
+          // Anything restored from disk is by definition unconfirmed, and a
+          // match cannot still be in play hours after kick-off — a restored
+          // "live" record from yesterday would otherwise sit on the Live tab
+          // forever with a running clock.
+          const matches = state.matches.map(m => reconcileRestored(m));
+          day.set(slug, { ...state, matches, stale: true });
+          for (const m of matches) this.byId.set(m.id, m);
         }
         this.days.set(dayKey, day);
       }
@@ -182,7 +244,7 @@ export class Store {
       if (keep) days[dayKey] = obj;
     }
     const snap: Snapshot = {
-      version: 1,
+      version: 2,
       savedAt: Date.now(),
       days,
       standings: Object.fromEntries(this.standings),
@@ -195,6 +257,24 @@ export class Store {
       console.warn('[store] snapshot failed', e);
     }
   }
+}
+
+/** Longest plausible match, including extra time and a generous delay. */
+const MAX_MATCH_MS = 4 * 3600_000;
+
+function reconcileRestored(m: Match): Match {
+  const inPlay = m.state === 'live' || m.state === 'halftime';
+  if (!inPlay || Date.now() - m.kickoff < MAX_MATCH_MS) return m;
+  return {
+    ...m,
+    state: 'finished',
+    statusLabel: 'FT',
+    minute: null,
+    minuteAsOf: null,
+    clockSeconds: null,
+    clockAsOf: null,
+    clockRunning: false,
+  };
 }
 
 export const store = new Store();

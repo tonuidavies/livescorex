@@ -32,11 +32,24 @@ const COUNTRY: Record<string, string> = {
   uga: 'Uganda', uru: 'Uruguay', usa: 'United States', ven: 'Venezuela',
   wal: 'Wales', zam: 'Zambia', zim: 'Zimbabwe',
 
+  // Additional codes carried by FotMob but absent from the ESPN catalogue.
+  alb: 'Albania', alg: 'Algeria', arm: 'Armenia', aze: 'Azerbaijan',
+  ban: 'Bangladesh', bih: 'Bosnia & Herzegovina', blr: 'Belarus',
+  cro: 'Croatia', egy: 'Egypt', est: 'Estonia', fro: 'Faroe Islands',
+  geo: 'Georgia', hun: 'Hungary', irn: 'Iran', irq: 'Iraq', isl: 'Iceland',
+  kaz: 'Kazakhstan', kor: 'South Korea', kuw: 'Kuwait', ltu: 'Lithuania',
+  lux: 'Luxembourg', lva: 'Latvia', mar: 'Morocco', mas: 'Malaysia',
+  mda: 'Moldova', mkd: 'North Macedonia', mne: 'Montenegro',
+  nzl: 'New Zealand', pan: 'Panama', pol: 'Poland', qat: 'Qatar',
+  sin: 'Singapore', srb: 'Serbia', svk: 'Slovakia', svn: 'Slovenia',
+  tan: 'Tanzania', tun: 'Tunisia', uae: 'United Arab Emirates',
+  ukr: 'Ukraine', uzb: 'Uzbekistan', vie: 'Vietnam',
+
   // Confederations and cross-border competitions
   afc: 'Asia', aff: 'ASEAN', caf: 'Africa', concacaf: 'CONCACAF',
   conmebol: 'South America', uefa: 'Europe', fifa: 'International',
   campeones: 'International', club: 'International', friendly: 'International',
-  global: 'International', nonfifa: 'International',
+  global: 'International', nonfifa: 'International', int: 'International',
 };
 
 /** Flag emoji is unreliable across Android OEM fonts — the app ships SVG flags
@@ -46,6 +59,34 @@ export function countryName(code: string): string {
 }
 
 const raw = readJson<RawLeague[]>('leagues.json');
+
+/**
+ * FotMob league id -> ESPN slug, built by data/build-league-map.mjs.
+ *
+ * Without this the merged feed lists England twice — once per source — and
+ * every big fixture appears in both groups.
+ */
+let fotmobMap: Record<string, string> = {};
+try {
+  fotmobMap = readJson<Record<string, string>>('league-map.json');
+} catch {
+  console.warn('[catalog] no league-map.json — run data/build-league-map.mjs');
+}
+
+/** Canonical slug for a source-native league key. */
+export function canonicalLeagueSlug(slug: string): string {
+  return fotmobMap[slug] ?? slug;
+}
+
+export const FOTMOB_LEAGUE_MAP = fotmobMap;
+
+/** ESPN slug -> FotMob league key, for asking FotMob about a canonical slug. */
+const reverse: Record<string, string> = {};
+for (const [fm, espnSlug] of Object.entries(fotmobMap)) reverse[espnSlug] = fm;
+export function fotmobKeyFor(slug: string): string | null {
+  if (slug.startsWith('fotmob:')) return slug;
+  return reverse[slug] ?? null;
+}
 
 const forcedTier1 = new Set(config.tier1Extra);
 

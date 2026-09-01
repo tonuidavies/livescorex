@@ -1,9 +1,10 @@
-import type { Match } from './schema.js';
+import type { Match, MatchDetail } from './schema.js';
 import type { Source } from '../sources/types.js';
 import { CircuitBreaker } from './breaker.js';
 import { store } from './store.js';
 import { LEAGUES } from '../catalog.js';
 import { config } from '../config.js';
+import { fetchFotmobDay } from '../sources/fotmob.js';
 
 export function dayKey(d: Date | number = Date.now()): string {
   const x = new Date(d);
@@ -49,17 +50,80 @@ export class Scheduler {
     pollsThisMinute: 0, deltasEmitted: 0,
   };
 
+  /** FotMob-specific counters, surfaced in /health. */
+  readonly fotmob = { polls: 0, failures: 0, matches: 0, lastAt: 0 };
+  private fotmobTimer: NodeJS.Timeout | null = null;
+
   constructor(private readonly sources: Source[]) {}
 
   start(): void {
     this.timer = setInterval(() => void this.tick(), 5_000);
     this.timer.unref?.();
+
+    /**
+     * FotMob returns every match in the world for a given day in a single
+     * request, so polling it broadly costs one call rather than one per
+     * league. That is what makes second-level clocks affordable across all
+     * competitions at once — the expensive per-league polling stays reserved
+     * for the leagues only ESPN carries.
+     */
+    if (config.fotmobEnabled) {
+      this.fotmobTimer = setInterval(() => void this.pollFotmob(), config.pollFotmob * 1000);
+      this.fotmobTimer.unref?.();
+      void this.pollFotmob();
+    }
+
     void this.bootstrap();
   }
 
   stop(): void {
     if (this.timer) clearInterval(this.timer);
+    if (this.fotmobTimer) clearInterval(this.fotmobTimer);
     this.timer = null;
+    this.fotmobTimer = null;
+  }
+
+  private fotmobRunning = false;
+
+  /** One request; every live match on the planet. */
+  private async pollFotmob(days: string[] = [dayKey()]): Promise<void> {
+    if (this.fotmobRunning) return;
+    this.fotmobRunning = true;
+    try {
+      for (const day of days) {
+        this.stats.requests += 1;
+        this.fotmob.polls += 1;
+        const matches = await fetchFotmobDay(day);
+        if (!matches) { this.fotmob.failures += 1; continue; }
+
+        this.fotmob.matches = matches.length;
+        this.fotmob.lastAt = Date.now();
+
+        // Group by canonical league so each slate lands where ESPN's does and
+        // the store can merge the two.
+        const bySlug = new Map<string, typeof matches>();
+        for (const m of matches) {
+          const arr = bySlug.get(m.league.slug) ?? [];
+          arr.push(m);
+          bySlug.set(m.league.slug, arr);
+        }
+
+        // A league FotMob covered a moment ago but not now has finished for
+        // the day; clear it rather than leaving a frozen slate behind.
+        for (const slug of store.sourceSlugs(day, 'fotmob')) {
+          if (!bySlug.has(slug)) bySlug.set(slug, []);
+        }
+
+        for (const [slug, list] of bySlug) {
+          const deltas = store.applyLeagueDay(day, slug, list, 'fotmob');
+          this.stats.deltasEmitted += deltas.length;
+        }
+      }
+    } catch (e) {
+      this.fotmob.failures += 1;
+    } finally {
+      this.fotmobRunning = false;
+    }
   }
 
   /** First run: get today on screen before worrying about the horizon. */
@@ -68,6 +132,7 @@ export class Scheduler {
     await this.sweep([dayKey()]);
     console.log('[sched] bootstrap: extending horizon');
     await this.sweep(this.horizon().slice(1));
+    if (config.fotmobEnabled) await this.pollFotmob(this.horizon().slice(1));
     this.lastSweepDay = dayKey();
   }
 
@@ -91,6 +156,10 @@ export class Scheduler {
    */
   private async fetchLeagueDay(slug: string, day: string): Promise<boolean> {
     for (const src of this.sources) {
+      // Sources without a per-league query are driven by their own whole-day
+      // path; calling them here would count an intentional no-op as a failure
+      // and trip their breaker.
+      if (!src.supportsLeagueDay) continue;
       if (this.breaker.isOpen(src.name)) continue;
       try {
         this.stats.requests += 1;
@@ -106,7 +175,7 @@ export class Scheduler {
         }
 
         this.breaker.success(src.name);
-        const deltas = store.applyLeagueDay(day, slug, matches);
+        const deltas = store.applyLeagueDay(day, slug, matches, src.name);
         this.stats.deltasEmitted += deltas.length;
         return true;
       } catch {
@@ -173,6 +242,7 @@ export class Scheduler {
       this.lastSweepDay = today;
       await this.sweep(this.horizon());
       await this.sweep(this.tier1Horizon());
+      if (config.fotmobEnabled) await this.pollFotmob(this.horizon());
       return;
     }
 
@@ -212,6 +282,11 @@ export class Scheduler {
       knownMatches: store.allMatches().length,
       breakers: this.breaker.status(),
       sources: this.sources.map(s => s.name),
+      fotmob: {
+        ...this.fotmob,
+        enabled: config.fotmobEnabled,
+        ageMs: this.fotmob.lastAt ? Date.now() - this.fotmob.lastAt : null,
+      },
     };
   }
 
@@ -255,11 +330,35 @@ export class Scheduler {
     return job;
   }
 
+  private async attachStandings(detail: MatchDetail, slug: string): Promise<MatchDetail> {
+    const leagueSlug = detail.match.league.slug || slug;
+    try {
+      await this.ensureStandings(leagueSlug);
+    } catch {
+      return detail;
+    }
+    const table = store.getStandings(leagueSlug);
+    if (!table) return detail;
+    return {
+      ...detail,
+      standings: table,
+      available: { ...detail.available, standings: true },
+    };
+  }
+
   /** Exposed so the REST layer can lazily fill standings on first request. */
   async ensureStandings(slug: string): Promise<void> {
     const existing = store.getStandings(slug);
     if (existing && Date.now() - existing.updatedAt < 10 * 60_000) return;
-    for (const src of this.sources) {
+    // A `fotmob:` slug can only be answered by FotMob; an ESPN slug is tried
+    // against ESPN first and FotMob second, since the mapping means many
+    // leagues have a table in both.
+    const prefix = slug.split(':')[0] ?? '';
+    const ordered = prefix === 'fotmob'
+      ? this.sources.filter(s => s.name === 'fotmob')
+      : [...this.sources.filter(s => s.name !== 'fotmob'), ...this.sources.filter(s => s.name === 'fotmob')];
+
+    for (const src of ordered) {
       if (this.breaker.isOpen(src.name)) continue;
       try {
         this.stats.requests += 1;
@@ -272,21 +371,46 @@ export class Scheduler {
     }
   }
 
+  /**
+   * Detail is routed by the id's own source prefix.
+   *
+   * A merged match keeps the winning source's id, so `fotmob:123` must ask
+   * FotMob and `espn:456` must ask ESPN — asking the wrong one returns
+   * nothing at all. Other sources are then tried as a genuine fallback.
+   */
   async fetchDetail(slug: string, matchId: string) {
-    const cached = store.getDetail(matchId, 15_000);
+    const id = store.resolveId(matchId);
+    const cached = store.getDetail(id, 8_000);
     if (cached) return cached;
-    for (const src of this.sources) {
+
+    const prefix = id.split(':')[0] ?? '';
+    const ordered = [
+      ...this.sources.filter(s => s.name === prefix),
+      ...this.sources.filter(s => s.name !== prefix),
+    ];
+
+    for (const src of ordered) {
       if (this.breaker.isOpen(src.name)) continue;
+      // Only the owning source can resolve its own id.
+      if (src.name !== prefix) continue;
       try {
         this.stats.requests += 1;
-        const d = await src.fetchDetail(slug, matchId);
-        if (d) { store.setDetail(matchId, d); this.breaker.success(src.name); return d; }
+        const d = await src.fetchDetail(slug, id);
+        if (d) {
+          // Not every source returns a table with the match payload. Fill it
+          // from the standings cache so the tab exists wherever a table does,
+          // rather than only for the source that happens to bundle one.
+          const withTable = d.standings ? d : await this.attachStandings(d, slug);
+          store.setDetail(id, withTable);
+          this.breaker.success(src.name);
+          return withTable;
+        }
         throw new Error('no detail');
       } catch {
         this.breaker.fail(src.name);
       }
     }
     // Last-known-good, however old, beats an error screen.
-    return store.getDetail(matchId, Number.MAX_SAFE_INTEGER) ?? null;
+    return store.getDetail(id, Number.MAX_SAFE_INTEGER) ?? null;
   }
 }

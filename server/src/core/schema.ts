@@ -63,15 +63,26 @@ export interface TeamStat {
   away: string;
   /** 0..1 share for the bar fill, when the stat is comparable */
   homeShare: number | null;
+  /** Section heading, e.g. 'Shots' or 'Expected goals (xG)'. Sources that
+   *  publish a flat list leave this null and everything renders as one block. */
+  group: string | null;
 }
 
 export interface LineupPlayer {
   id: string;
+  /** Full name, e.g. "Victor Nilsson Lindelöf". */
   name: string;
+  /** Abbreviated for the pitch graphic, e.g. "V. Lindelöf". */
   shortName: string;
   number: number | null;
   position: string | null;
   starter: boolean;
+  /** 0-10 match rating. Only some sources compute one. */
+  rating: number | null;
+  /** Player of the match. */
+  motm: boolean;
+  goals: number;
+  assists: number;
   /** Normalised pitch coordinates, 0..1. x = touchline-to-touchline,
    *  y = own goal (0) to opposition goal (1). null when the source has no
    *  formation grid — the UI then falls back to a list. */
@@ -87,6 +98,9 @@ export interface TeamLineup {
   players: LineupPlayer[];    // starters + bench
   /** true when at least one starter has usable x/y */
   hasPitchPositions: boolean;
+  coach: string | null;
+  /** Aggregate team rating, when the source computes one. */
+  rating: number | null;
 }
 
 export interface StandingRow {
@@ -127,6 +141,22 @@ export interface Match {
   state: MatchState;
   /** minute of play when live; null otherwise */
   minute: number | null;
+
+  /**
+   * Elapsed seconds of play as of `clockAsOf`.
+   *
+   * The whole point of carrying seconds rather than minutes: a source that
+   * publishes `68:05` lets the client run a real ticking clock, which is what
+   * makes the app feel level with a scout-fed service instead of a minute
+   * behind it. Sources that only publish whole minutes leave this null and the
+   * client falls back to interpolating from `minuteAsOf`.
+   */
+  clockSeconds: number | null;
+  clockAsOf: number | null;
+  /** False at half time and full time, when the clock should stop advancing. */
+  clockRunning: boolean;
+  /** Announced stoppage time for the current period, in minutes. */
+  addedTime: number | null;
   /**
    * When `minute` was observed, epoch ms.
    *
@@ -156,10 +186,13 @@ export interface MatchInfo {
   venue: string | null;
   city: string | null;
   country: string | null;
+  capacity: number | null;
   attendance: number | null;
   referee: string | null;
   /** Other named officials, when the source lists them. */
   officials: string[];
+  homeCoach: string | null;
+  awayCoach: string | null;
 }
 
 export interface MatchDetail {

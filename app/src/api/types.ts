@@ -26,17 +26,33 @@ export interface MatchEvent {
 
 export interface TeamStat {
   key: string; label: string; home: string; away: string; homeShare: number | null;
+  /** Section heading, e.g. 'Shots'. Null when the source publishes a flat list. */
+  group: string | null;
 }
 
 export interface LineupPlayer {
-  id: string; name: string; shortName: string; number: number | null;
+  id: string;
+  /** Full name, e.g. "Victor Nilsson Lindelöf". */
+  name: string;
+  /** Abbreviated for the pitch graphic. */
+  shortName: string;
+  number: number | null;
   position: string | null; starter: boolean;
   x: number | null; y: number | null;
+  /** 0-10 match rating; only some sources compute one. */
+  rating: number | null;
+  motm: boolean;
+  goals: number;
+  assists: number;
   yellow: boolean; red: boolean; subbedOff: boolean;
 }
 
 export interface TeamLineup {
-  formation: string | null; players: LineupPlayer[]; hasPitchPositions: boolean;
+  formation: string | null;
+  players: LineupPlayer[];
+  hasPitchPositions: boolean;
+  coach: string | null;
+  rating: number | null;
 }
 
 export interface StandingRow {
@@ -55,6 +71,12 @@ export interface Match {
   minute: number | null;
   /** When `minute` was observed — see useMatchClock for why this matters. */
   minuteAsOf: number | null;
+  /** Elapsed seconds of play as of `clockAsOf`; null when the source only
+   *  publishes whole minutes. */
+  clockSeconds: number | null;
+  clockAsOf: number | null;
+  clockRunning: boolean;
+  addedTime: number | null;
   statusLabel: string;
   home: Team; away: Team;
   score: { home: number | null; away: number | null };
@@ -66,9 +88,12 @@ export interface MatchInfo {
   venue: string | null;
   city: string | null;
   country: string | null;
+  capacity: number | null;
   attendance: number | null;
   referee: string | null;
   officials: string[];
+  homeCoach: string | null;
+  awayCoach: string | null;
 }
 
 export interface MatchDetail {

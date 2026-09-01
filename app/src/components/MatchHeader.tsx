@@ -6,6 +6,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { space, type as t, font } from '../theme';
 import type { Match } from '../api/types';
 import { kickoffTime, longDate, statusCell } from '../util/format';
+import { matchClock } from '../util/useMatchClock';
 import { Crest, LeagueCrest } from './Crest';
 import { Star } from './Star';
 
@@ -28,9 +29,13 @@ export function MatchHeader({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const status = statusCell(match, now ?? Date.now());
+  const tick = now ?? Date.now();
+  const status = statusCell(match, tick);
   const played = match.score.home !== null && match.score.away !== null;
   const live = match.state === 'live' || match.state === 'halftime';
+  // Seconds are too noisy for a list row but exactly right here, where a
+  // running clock is the difference between "live" and "probably live".
+  const clock = matchClock(match, tick);
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.header, paddingTop: insets.top + space.sm }]}>
@@ -52,9 +57,24 @@ export function MatchHeader({
         </View>
 
         {live ? (
-          <Text style={{ color: colors.liveBright, fontFamily: font.bold, fontSize: 15 }}>
-            {status.text}
-          </Text>
+          <View style={styles.clockWrap}>
+            <View style={[styles.livePulse, { backgroundColor: colors.liveBright }]} />
+            <Text
+              style={{
+                color: colors.liveBright,
+                fontFamily: font.bold,
+                fontSize: 15,
+                fontVariant: ['tabular-nums'],
+              }}
+            >
+              {match.state === 'halftime' ? 'HT' : clock?.label ?? status.text}
+            </Text>
+            {match.addedTime ? (
+              <Text style={[t.caption, { color: 'rgba(255,255,255,0.55)' }]}>
+                +{match.addedTime}
+              </Text>
+            ) : null}
+          </View>
         ) : (
           <View style={styles.headerActions}>
             <Star on={starred} onToggle={onToggleStar} size={16} />
@@ -137,6 +157,8 @@ const styles = StyleSheet.create({
   titleCol: { flex: 1, alignItems: 'center' },
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  clockWrap: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  livePulse: { width: 6, height: 6, borderRadius: 3 },
   scoreRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: space.lg },
   teamBlock: { flex: 1, alignItems: 'center', gap: space.sm },
   crestRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },

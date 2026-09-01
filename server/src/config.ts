@@ -25,6 +25,18 @@ export const config = {
   pollLiveTier1: num(process.env.POLL_LIVE_TIER1, 5),
   pollLiveTier2: num(process.env.POLL_LIVE_TIER2, 12),
 
+  /**
+   * FotMob supplies the second-level match clock, player ratings, coaches and
+   * xG that ESPN does not publish for football, and covers roughly four times
+   * as many competitions on a busy day. It does not carry the Kenyan Premier
+   * League — or Ghana, Uganda, Zambia, Zimbabwe — so it supplements ESPN
+   * rather than replacing it.
+   */
+  fotmobEnabled: process.env.FOTMOB_ENABLED !== 'false',
+
+  /** One request covers every live match worldwide, so this can be tight. */
+  pollFotmob: num(process.env.POLL_FOTMOB, 6),
+
   /** Local hour for the daily full-catalog fixture sweep. */
   sweepHour: num(process.env.SWEEP_HOUR, 4),
 

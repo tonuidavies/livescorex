@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t } from '../theme';
 import { agoLabel } from '../util/format';
+import type { Freshness } from '../util/freshness';
 
 /**
  * The states the wireframes did not cover.
@@ -73,30 +74,32 @@ export function ErrorState({
  * different fixes, so the banner names the actual one rather than showing a
  * single vague warning.
  */
-export function StaleBanner({
-  fetchedAt, offline, disconnected,
-}: { fetchedAt: number; offline?: boolean; disconnected?: boolean }) {
+export function StaleBanner({ state }: { state: Freshness }) {
   const { colors } = useTheme();
-  const tone = offline ? colors.redCard : colors.stale;
-  const message = offline
-    ? 'No internet connection'
-    : disconnected
-      ? 'Reconnecting to live updates'
-      : 'Live updates paused';
+  if (state.kind === 'ok') return null;
+
+  const tone = state.kind === 'offline' ? colors.redCard : colors.stale;
+  const message =
+    state.kind === 'offline' ? 'No internet connection'
+    : state.kind === 'disconnected' ? 'Reconnecting to live updates'
+    : 'Live scores may be delayed';
+  const icon = state.kind === 'offline' ? 'cloud-offline' : 'sync';
+  const since = state.kind === 'offline' ? null : state.since;
 
   return (
     <View style={[styles.banner, { backgroundColor: colors.cardAlt, borderColor: tone }]}>
-      <Ionicons
-        name={offline ? 'cloud-offline' : 'sync'}
-        size={13}
-        color={tone}
-      />
+      <Ionicons name={icon} size={13} color={tone} />
       <Text style={[t.caption, { color: colors.text }]} numberOfLines={1}>
         {message}
       </Text>
-      <Text style={[t.caption, { color: colors.textMuted, flex: 1, textAlign: 'right' }]} numberOfLines={1}>
-        Scores from {agoLabel(fetchedAt)}
-      </Text>
+      {since ? (
+        <Text
+          style={[t.caption, { color: colors.textMuted, flex: 1, textAlign: 'right' }]}
+          numberOfLines={1}
+        >
+          Updated {agoLabel(since)}
+        </Text>
+      ) : null}
     </View>
   );
 }

@@ -12,6 +12,7 @@ import { SideBar } from '../components/SideBar';
 import { EmptyState, ErrorState, RowSkeleton, StaleBanner } from '../components/StateViews';
 import { useNowTicker } from '../util/useMatchClock';
 import { useOnline } from '../util/useOnline';
+import { freshness } from '../util/freshness';
 import type { TabScreenProps } from '../navigation/types';
 import type { Match } from '../api/types';
 import { SelectionBar } from '../components/SelectionBar';
@@ -70,6 +71,7 @@ export function LiveScreen({ navigation }: Props) {
         onProfile={() => navigation.navigate('Profile')}
         liveActive={onlyMine}
         onToggleLive={() => setOnlyMine(v => !v)}
+        liveLabel={onlyMine ? 'MINE' : 'ALL'}
         connState={conn}
       />
 
@@ -77,13 +79,7 @@ export function LiveScreen({ navigation }: Props) {
         <SelectionBar count={prefs.matches.length} onDone={() => setSelecting(false)} />
       ) : null}
 
-      {(!online || conn === 'offline' || (error && hasData)) ? (
-        <StaleBanner
-          fetchedAt={lastLoadedAt || Date.now()}
-          offline={!online}
-          disconnected={conn === 'offline'}
-        />
-      ) : null}
+      <StaleBanner state={freshness(groups, conn, online, lastLoadedAt)} />
 
       {loading && !hasData ? (
         <View style={{ paddingTop: space.lg }}><RowSkeleton /></View>

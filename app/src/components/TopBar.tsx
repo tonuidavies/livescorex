@@ -9,7 +9,8 @@ import { ConnDot } from './StateViews';
 
 /** Top chrome shared by Matches and Live, per the wireframe. */
 export function TopBar({
-  onMenu, onSearch, onSort, onSettings, onProfile, liveActive, onToggleLive, connState,
+  onMenu, onSearch, onSort, onSettings, onProfile, liveActive, onToggleLive,
+  connState, liveLabel = 'LIVE',
 }: {
   onMenu: () => void;
   onSearch: () => void;
@@ -19,6 +20,8 @@ export function TopBar({
   liveActive: boolean;
   onToggleLive: () => void;
   connState: 'open' | 'connecting' | 'offline';
+  /** The pill doubles as the scope switch, so its wording varies by screen. */
+  liveLabel?: string;
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -44,11 +47,11 @@ export function TopBar({
         ]}
         accessibilityRole="button"
         accessibilityState={{ selected: liveActive }}
-        accessibilityLabel={liveActive ? 'Showing live matches only' : 'Show live matches only'}
+        accessibilityLabel={liveActive ? 'Showing only leagues you follow' : 'Showing all competitions'}
       >
         <ConnDot state={connState} />
         <Text style={{ color: liveActive ? '#FFF' : colors.textMuted, fontFamily: font.bold, fontSize: 12.5 }}>
-          LIVE
+          {liveLabel}
         </Text>
       </Pressable>
 

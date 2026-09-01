@@ -1,5 +1,5 @@
 import type { Match } from '../api/types';
-import { displayMinute } from './useMatchClock';
+import { matchClock } from './useMatchClock';
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
 
@@ -48,8 +48,11 @@ export function statusCell(
   now: number = Date.now(),
 ): { text: string; tone: 'live' | 'muted' | 'normal' } {
   if (m.state === 'live') {
-    const mm = displayMinute(m, now);
-    return { text: mm !== null ? `${mm}'` : 'LIVE', tone: 'live' };
+    const c = matchClock(m, now);
+    if (!c) return { text: 'LIVE', tone: 'live' };
+    // Seconds belong on the detail screen, not in a dense list row where they
+    // would be the noisiest thing on screen.
+    return { text: `${c.minute}'`, tone: 'live' };
   }
   if (m.state === 'halftime') return { text: 'HT', tone: 'live' };
   if (m.state === 'finished') return { text: 'FT', tone: 'muted' };

@@ -4,6 +4,7 @@ import Svg, { Circle, Line, Rect } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space, type as t, font } from '../theme';
 import type { LineupPlayer, TeamLineup } from '../api/types';
+import { Rating } from './Rating';
 
 const NODE = 30;
 
@@ -20,15 +21,19 @@ const NODE = 30;
  * positions. A wrong pitch is worse than no pitch.
  */
 export function Pitch({
-  home, away, homeColor, awayColor,
-}: { home: TeamLineup; away: TeamLineup; homeColor: string; awayColor: string }) {
+  home, away, homeColor, awayColor, homeName, awayName,
+}: {
+  home: TeamLineup; away: TeamLineup;
+  homeColor: string; awayColor: string;
+  homeName?: string; awayName?: string;
+}) {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const w = width - space.md * 2;
   const h = w * 1.45;
 
   const usable = home.hasPitchPositions || away.hasPitchPositions;
-  if (!usable) return <LineupList home={home} away={away} />;
+  if (!usable) return <LineupList home={home} away={away} homeName={homeName} awayName={awayName} />;
 
   const starters = (l: TeamLineup) => l.players.filter(p => p.starter && p.x !== null && p.y !== null);
 
@@ -71,15 +76,36 @@ export function Pitch({
       </View>
 
       <View style={styles.formations}>
-        <Text style={[t.caption, { color: colors.textMuted }]}>
-          {away.formation ? `Away · ${away.formation}` : 'Away'}
-        </Text>
-        <Text style={[t.caption, { color: colors.textMuted }]}>
-          {home.formation ? `Home · ${home.formation}` : 'Home'}
-        </Text>
+        <TeamMeta lineup={away} name={awayName ?? 'Away'} color={awayColor} align="left" />
+        <TeamMeta lineup={home} name={homeName ?? 'Home'} color={homeColor} align="right" />
       </View>
 
-      <Bench home={home} away={away} />
+      <Bench home={home} away={away} homeName={homeName} awayName={awayName} />
+    </View>
+  );
+}
+
+/** Formation, coach and team rating under the pitch. */
+function TeamMeta({
+  lineup, name, color, align,
+}: { lineup: TeamLineup; name: string; color: string; align: 'left' | 'right' }) {
+  const { colors } = useTheme();
+  const right = align === 'right';
+  return (
+    <View style={{ flex: 1, alignItems: right ? 'flex-end' : 'flex-start' }}>
+      <View style={[styles.metaRow, right && { flexDirection: 'row-reverse' }]}>
+        <View style={[styles.swatch, { backgroundColor: color }]} />
+        <Text style={[t.label, { color: colors.text }]} numberOfLines={1}>
+          {name}
+        </Text>
+        {lineup.rating ? <Rating value={lineup.rating} size="sm" /> : null}
+      </View>
+      <Text
+        style={[t.caption, { color: colors.textMuted, textAlign: right ? 'right' : 'left' }]}
+        numberOfLines={1}
+      >
+        {[lineup.formation, lineup.coach].filter(Boolean).join('  ·  ') || '—'}
+      </Text>
     </View>
   );
 }
@@ -100,7 +126,7 @@ function PlayerNode({
       key="tag"
       style={[
         styles.nameTag,
-        { backgroundColor: 'rgba(0,0,0,0.65)' },
+        { backgroundColor: 'rgba(0,0,0,0.72)' },
         tag === 'above' ? { marginBottom: 3 } : { marginTop: 3 },
       ]}
     >
@@ -111,8 +137,16 @@ function PlayerNode({
   );
 
   const circle = (
-    <View key="circle" style={[styles.circle, { backgroundColor: color }]}>
-      <Text style={styles.number}>{player.number ?? ''}</Text>
+    <View key="circle" style={styles.circleWrap}>
+      <View
+        style={[
+          styles.circle,
+          { backgroundColor: color },
+          player.motm && { borderWidth: 2, borderColor: '#F2C230' },
+        ]}
+      >
+        <Text style={styles.number}>{player.number ?? ''}</Text>
+      </View>
       {player.yellow || player.red ? (
         <View
           style={[
@@ -120,6 +154,16 @@ function PlayerNode({
             { backgroundColor: player.red ? colors.redCard : colors.yellowCard },
           ]}
         />
+      ) : null}
+      {player.goals > 0 ? (
+        <View style={styles.goalPip}>
+          <Text style={styles.goalPipText}>
+            {player.goals > 1 ? `⚽${player.goals}` : '⚽'}
+          </Text>
+        </View>
+      ) : null}
+      {player.rating !== null ? (
+        <Rating value={player.rating} size="sm" style={styles.ratingChip} />
       ) : null}
     </View>
   );
@@ -134,21 +178,37 @@ function PlayerNode({
   );
 }
 
-function Bench({ home, away }: { home: TeamLineup; away: TeamLineup }) {
+function Bench({
+  home, away, homeName, awayName,
+}: { home: TeamLineup; away: TeamLineup; homeName?: string; awayName?: string }) {
   const { colors } = useTheme();
   const subs = (l: TeamLineup) => l.players.filter(p => !p.starter);
   if (!subs(home).length && !subs(away).length) return null;
 
   return (
     <View style={{ marginTop: space.xl }}>
-      <Text style={[t.label, { color: colors.textMuted, marginBottom: space.sm }]}>SUBSTITUTES</Text>
+      <Text style={[t.label, { color: colors.textMuted, marginBottom: space.md }]}>
+        SUBSTITUTES
+      </Text>
       <View style={{ flexDirection: 'row', gap: space.lg }}>
-        {[home, away].map((l, i) => (
-          <View key={i} style={{ flex: 1, gap: 6 }}>
-            {subs(l).map(p => (
-              <Text key={p.id} style={[t.caption, { color: colors.textMuted }]} numberOfLines={1}>
-                {p.number ?? '–'}  {p.shortName}
-              </Text>
+        {[
+          { l: home, n: homeName ?? 'Home' },
+          { l: away, n: awayName ?? 'Away' },
+        ].map((side, i) => (
+          <View key={i} style={{ flex: 1, gap: 7 }}>
+            <Text style={[t.caption, { color: colors.textDim }]} numberOfLines={1}>
+              {side.n}
+            </Text>
+            {subs(side.l).map(p => (
+              <View key={p.id} style={styles.listRow}>
+                <Text style={[t.caption, { color: colors.textDim, width: 20 }]}>
+                  {p.number ?? '–'}
+                </Text>
+                <Text style={[t.caption, { color: colors.textMuted, flex: 1 }]} numberOfLines={1}>
+                  {p.name}
+                </Text>
+                {p.rating !== null ? <Rating value={p.rating} size="sm" /> : null}
+              </View>
             ))}
           </View>
         ))}
@@ -157,20 +217,32 @@ function Bench({ home, away }: { home: TeamLineup; away: TeamLineup }) {
   );
 }
 
-/** Degraded view for leagues without a formation grid. */
-function LineupList({ home, away }: { home: TeamLineup; away: TeamLineup }) {
+/**
+ * Degraded view for competitions without a formation grid.
+ *
+ * Full names here rather than the pitch's abbreviations: the constraint that
+ * forces "V. Lindelöf" onto a 30px circle does not apply to a list, and the
+ * full name is what people actually want to read.
+ */
+function LineupList({
+  home, away, homeName, awayName,
+}: { home: TeamLineup; away: TeamLineup; homeName?: string; awayName?: string }) {
   const { colors } = useTheme();
+
   const col = (l: TeamLineup, label: string) => (
-    <View style={{ flex: 1, gap: 8 }}>
-      <Text style={[t.label, { color: colors.textMuted }]}>
-        {label}{l.formation ? ` · ${l.formation}` : ''}
+    <View style={{ flex: 1, gap: 10 }}>
+      <Text style={[t.label, { color: colors.text }]} numberOfLines={1}>{label}</Text>
+      <Text style={[t.caption, { color: colors.textMuted, marginTop: -6 }]} numberOfLines={1}>
+        {[l.formation, l.coach].filter(Boolean).join('  ·  ') || '—'}
       </Text>
       {l.players.filter(p => p.starter).map(p => (
         <View key={p.id} style={styles.listRow}>
           <Text style={[t.caption, { color: colors.textDim, width: 22 }]}>{p.number ?? '–'}</Text>
-          <Text style={[t.body, { color: colors.text, flex: 1 }]} numberOfLines={1}>{p.shortName}</Text>
+          <Text style={[t.body, { color: colors.text, flex: 1 }]} numberOfLines={1}>{p.name}</Text>
+          {p.goals > 0 ? <Text style={{ fontSize: 11 }}>⚽</Text> : null}
           {p.yellow ? <View style={[styles.miniCard, { backgroundColor: colors.yellowCard }]} /> : null}
           {p.red ? <View style={[styles.miniCard, { backgroundColor: colors.redCard }]} /> : null}
+          {p.rating !== null ? <Rating value={p.rating} size="sm" /> : null}
         </View>
       ))}
     </View>
@@ -178,8 +250,8 @@ function LineupList({ home, away }: { home: TeamLineup; away: TeamLineup }) {
 
   return (
     <View style={{ flexDirection: 'row', gap: space.lg, padding: space.md }}>
-      {col(home, 'HOME')}
-      {col(away, 'AWAY')}
+      {col(home, homeName ?? 'Home')}
+      {col(away, awayName ?? 'Away')}
     </View>
   );
 }
@@ -188,6 +260,12 @@ const styles = StyleSheet.create({
   pitch: { borderRadius: radius.md, overflow: 'hidden', alignSelf: 'center' },
   formations: { flexDirection: 'row', justifyContent: 'space-between', marginTop: space.sm },
   node: { position: 'absolute', width: NODE, alignItems: 'center' },
+  circleWrap: { width: NODE, height: NODE, alignItems: 'center', justifyContent: 'center' },
+  ratingChip: { position: 'absolute', bottom: -8, right: -14 },
+  goalPip: { position: 'absolute', left: -10, top: -4 },
+  goalPipText: { fontSize: 9 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
+  swatch: { width: 8, height: 8, borderRadius: 2 },
   circle: {
     width: NODE, height: NODE, borderRadius: NODE / 2,
     alignItems: 'center', justifyContent: 'center',
