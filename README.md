@@ -410,6 +410,14 @@ with the debug keystore — installable and self-contained, not for distribution
 
 Transfer it to the phone and allow installation from unknown sources.
 
+Gradle does not treat `app.json` or `EXPO_PUBLIC_API_URL` as bundle inputs, so
+after changing the address delete the cached bundle or the old URL is silently
+re-packaged:
+
+```bash
+rm -rf app/build/generated/assets/react app/build/intermediates/assets
+```
+
 **The phone must reach the server.** Run it bound to your LAN and keep the
 phone on the same Wi-Fi:
 
