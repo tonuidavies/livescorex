@@ -54,7 +54,7 @@ export class Scheduler {
   };
 
   /** FotMob-specific counters, surfaced in /health. */
-  readonly fotmob = { polls: 0, failures: 0, matches: 0, lastAt: 0 };
+  readonly fotmob = { polls: 0, failures: 0, matches: 0, lastAt: 0, intervalSeconds: 0 };
   private fotmobTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly sources: Source[]) {}
@@ -71,9 +71,9 @@ export class Scheduler {
      * for the leagues only ESPN carries.
      */
     if (config.fotmobEnabled) {
-      this.fotmobTimer = setInterval(() => void this.pollFotmob(), config.pollFotmob * 1000);
-      this.fotmobTimer.unref?.();
-      void this.pollFotmob();
+      // Rescheduled after each pass so the cadence can follow whether
+      // anything is actually in play — see scheduleFotmob.
+      void this.pollFotmob().then(() => this.scheduleFotmob());
     }
 
     void this.bootstrap();
@@ -81,12 +81,31 @@ export class Scheduler {
 
   stop(): void {
     if (this.timer) clearInterval(this.timer);
-    if (this.fotmobTimer) clearInterval(this.fotmobTimer);
+    if (this.fotmobTimer) clearTimeout(this.fotmobTimer);
     this.timer = null;
     this.fotmobTimer = null;
   }
 
   private fotmobRunning = false;
+
+  /**
+   * Poll fast while matches are in play, slowly when none are.
+   *
+   * At two seconds a goal reaches the phone about a second after the source
+   * publishes it; at thirty, a kick-off is still noticed promptly while the
+   * overnight hours cost almost nothing. Only the live day bypasses their edge
+   * cache, so this is one uncached request per tick and nothing else.
+   */
+  private scheduleFotmob(): void {
+    if (this.fotmobTimer) clearTimeout(this.fotmobTimer);
+    const anyLive = store.liveMatches().some(m => m.source === 'fotmob');
+    const seconds = anyLive ? config.pollFotmobLive : config.pollFotmobIdle;
+    this.fotmobTimer = setTimeout(() => {
+      void this.pollFotmob().finally(() => this.scheduleFotmob());
+    }, seconds * 1000);
+    this.fotmobTimer.unref?.();
+    this.fotmob.intervalSeconds = seconds;
+  }
 
   /** One request; every live match on the planet. */
   private async pollFotmob(days: string[] = [dayKey()], fresh = true): Promise<void> {

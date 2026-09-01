@@ -34,8 +34,20 @@ export const config = {
    */
   fotmobEnabled: process.env.FOTMOB_ENABLED !== 'false',
 
-  /** One request covers every live match worldwide, so this can be tight. */
-  pollFotmob: num(process.env.POLL_FOTMOB, 6),
+  /**
+   * One request covers every live match on the planet, so the cadence is set
+   * by how fresh a goal needs to be rather than by cost.
+   *
+   * Note this does *not* affect the match clock — that is interpolated on the
+   * client and already tracks the source to within a second. It governs goal
+   * latency alone: on average half the interval, at worst the whole of it.
+   *
+   * Adaptive, because polling every two seconds through the small hours when
+   * nothing anywhere is in play is pure waste. Idle drops to a slow watch
+   * that only needs to notice a kick-off.
+   */
+  pollFotmobLive: num(process.env.POLL_FOTMOB_LIVE, 2),
+  pollFotmobIdle: num(process.env.POLL_FOTMOB_IDLE, 30),
 
   /** Local hour for the daily full-catalog fixture sweep. */
   sweepHour: num(process.env.SWEEP_HOUR, 4),
