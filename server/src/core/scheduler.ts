@@ -54,7 +54,11 @@ export class Scheduler {
   };
 
   /** FotMob-specific counters, surfaced in /health. */
-  readonly fotmob = { polls: 0, failures: 0, matches: 0, lastAt: 0, intervalSeconds: 0 };
+  readonly fotmob = {
+    polls: 0, failures: 0, matches: 0, lastAt: 0, intervalSeconds: 0,
+    /** Live matches in FotMob's own last payload — see scheduleFotmob. */
+    liveInLastPoll: 0,
+  };
   private fotmobTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly sources: Source[]) {}
@@ -98,8 +102,18 @@ export class Scheduler {
    */
   private scheduleFotmob(): void {
     if (this.fotmobTimer) clearTimeout(this.fotmobTimer);
-    const anyLive = store.liveMatches().some(m => m.source === 'fotmob');
-    const seconds = anyLive ? config.pollFotmobLive : config.pollFotmobIdle;
+    /*
+     * Driven by what FotMob's own last payload contained, not by which source
+     * won the merge.
+     *
+     * Asking the merged store "are any live matches attributed to fotmob"
+     * couples the poll rate to merge preference: if the other source ever won
+     * those fixtures, this would idle at 30s while matches were in play and
+     * quietly cost the goal latency the fast cadence exists to buy.
+     */
+    const seconds = this.fotmob.liveInLastPoll > 0
+      ? config.pollFotmobLive
+      : config.pollFotmobIdle;
     this.fotmobTimer = setTimeout(() => {
       void this.pollFotmob().finally(() => this.scheduleFotmob());
     }, seconds * 1000);
@@ -120,6 +134,11 @@ export class Scheduler {
 
         this.fotmob.matches = matches.length;
         this.fotmob.lastAt = Date.now();
+        if (fresh) {
+          this.fotmob.liveInLastPoll = matches.filter(
+            m => m.state === 'live' || m.state === 'halftime',
+          ).length;
+        }
 
         // Group by canonical league so each slate lands where ESPN's does and
         // the store can merge the two.
