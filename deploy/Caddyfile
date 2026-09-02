@@ -1,0 +1,28 @@
+# /etc/caddy/Caddyfile
+#
+# Caddy obtains and renews a Let's Encrypt certificate automatically. Replace
+# the hostname below with your own domain, or — if you have no domain — use
+# the VPS IP through sslip.io, which resolves any 1-2-3-4.sslip.io to 1.2.3.4
+# and is a perfectly valid name for certificate issuance:
+#
+#     203-0-113-9.sslip.io
+#
+# Android release builds refuse cleartext HTTP, so terminating TLS here is
+# what lets the app drop the withCleartextTraffic plugin.
+
+REPLACE_WITH_HOSTNAME {
+	encode zstd gzip
+
+	# The delta stream is a long-lived WebSocket; Caddy proxies it natively,
+	# but the read timeout has to outlast a quiet period between goals.
+	reverse_proxy 127.0.0.1:8787 {
+		transport http {
+			read_timeout 1h
+		}
+	}
+
+	log {
+		output file /var/log/caddy/livescorex.log
+		format console
+	}
+}

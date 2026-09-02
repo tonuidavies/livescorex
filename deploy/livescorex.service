@@ -1,0 +1,48 @@
+# /etc/systemd/system/livescorex.service
+[Unit]
+Description=LivescoreX ingestion server
+Documentation=https://github.com/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=livescorex
+Group=livescorex
+WorkingDirectory=/opt/livescorex/server
+ExecStart=/usr/bin/node dist/index.js
+
+Environment=NODE_ENV=production
+Environment=PORT=8787
+# State lives outside the code checkout so a redeploy never wipes the snapshot.
+Environment=SNAPSHOT_DIR=/var/lib/livescorex
+# Displaying odds is a licensing decision, not a technical one — see the README.
+Environment=ODDS_ENABLED=false
+Environment=POLL_FOTMOB_LIVE=2
+Environment=POLL_FOTMOB_IDLE=30
+# Push stays in dry-run until a service account exists:
+# Environment=GOOGLE_APPLICATION_CREDENTIALS=/etc/livescorex/service-account.json
+
+Restart=always
+RestartSec=5
+# A crash loop should back off rather than hammer the upstreams on every boot.
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+# The process needs the network, its own state directory, and nothing else.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/livescorex
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+MemoryMax=512M
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=livescorex
+
+[Install]
+WantedBy=multi-user.target

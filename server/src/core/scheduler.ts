@@ -197,11 +197,14 @@ export class Scheduler {
    * stale rather than cleared.
    */
   private async fetchLeagueDay(slug: string, day: string, force = false): Promise<boolean> {
+    const owner = this.slugOwner(slug);
     for (const src of this.sources) {
       // Sources without a per-league query are driven by their own whole-day
       // path; calling them here would count an intentional no-op as a failure
       // and trip their breaker.
       if (!src.supportsLeagueDay) continue;
+      // Likewise a slug that belongs to somebody else's namespace.
+      if (owner && owner !== src.name) continue;
       // `force` is for user-initiated fetches: somebody tapping a date should
       // get a live attempt rather than an empty screen because a background
       // poll tripped the breaker a minute ago.
@@ -232,10 +235,19 @@ export class Scheduler {
         const deltas = store.applyLeagueDay(day, slug, matches, src.name);
         this.stats.deltasEmitted += deltas.length;
         return true;
-      } catch {
+      } catch (err) {
+        // A swallowed error here cost hours once: the breaker opened, every
+        // league went stale, and the log said nothing at all.
+        console.warn(
+          `[poll] ${src.name} ${slug} ${day}: ${err instanceof Error ? err.message : String(err)}`,
+        );
         this.breaker.fail(src.name);
       }
     }
+    // Nobody was eligible: the slug belongs to a whole-day source, which is
+    // keeping it fresh through its own path. Marking it stale here would put
+    // a staleness banner on a perfectly live match.
+    if (owner) return false;
     store.markStale(day, slug);
     return false;
   }
@@ -273,6 +285,21 @@ export class Scheduler {
    * Which leagues need attention right now: any with a match in progress, or
    * kicking off shortly, or recently finished (so full-time is not missed).
    */
+  /**
+   * Which source, if any, exclusively owns a slug.
+   *
+   * FotMob emits `fotmob:<id>` slugs for competitions with no ESPN
+   * counterpart. ESPN answers those with null, and the source loop counted
+   * that null as an ESPN failure — so three FotMob-only leagues kicking off
+   * together opened ESPN's breaker and took Kenya, Ghana and Uganda dark for
+   * five minutes. A namespaced slug is addressed to one source; nobody else
+   * should be asked, let alone blamed.
+   */
+  private slugOwner(slug: string): string | null {
+    const i = slug.indexOf(':');
+    return i === -1 ? null : slug.slice(0, i);
+  }
+
   private activeLeagues(): Map<string, 1 | 2> {
     const now = Date.now();
     const active = new Map<string, 1 | 2>();
@@ -302,6 +329,10 @@ export class Scheduler {
       if (!inWindow) continue;
       // Another source is already live on this league this minute.
       if (m.source !== 'fotmob' && coveredByFotmob.has(m.league.slug)) continue;
+      // A slug owned by a whole-day source has no per-league endpoint to poll;
+      // its own path already keeps it fresh.
+      const owner = this.slugOwner(m.league.slug);
+      if (owner && !this.sources.some(s => s.name === owner && s.supportsLeagueDay)) continue;
       active.set(m.league.slug, m.league.tier);
     }
     return active;
