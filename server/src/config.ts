@@ -63,6 +63,16 @@ export const config = {
   pollFotmobLive: num(process.env.POLL_FOTMOB_LIVE, 2),
   pollFotmobIdle: num(process.env.POLL_FOTMOB_IDLE, 30),
 
+  /**
+   * How long a fixture list for a day other than today stays trusted.
+   *
+   * Fixtures are not static: matches get postponed, moved and rescheduled.
+   * Until now a day fetched on demand was cached forever — browse to a date
+   * three weeks out and whatever it said then is what it would say for good.
+   * Today's slate is exempt because live polling already covers it.
+   */
+  coldDayTtlMinutes: num(process.env.COLD_DAY_TTL_MINUTES, 30),
+
   /** Local hour for the daily full-catalog fixture sweep. */
   sweepHour: num(process.env.SWEEP_HOUR, 4),
 

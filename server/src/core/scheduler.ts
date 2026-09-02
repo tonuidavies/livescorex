@@ -375,10 +375,48 @@ export class Scheduler {
    * produce one upstream sweep, not twenty.
    */
   private dayFetches = new Map<string, Promise<void>>();
+  /** Days with a background refresh already in flight. */
+  private refreshing = new Set<string>();
 
   async ensureDay(day: string, slugs?: string[]): Promise<void> {
     const wanted = slugs?.length ? slugs : LEAGUES.map(l => l.slug);
-    const missing = wanted.filter(slug => !store.getLeagueDay(day, slug));
+
+    const now = Date.now();
+    const isToday = day === dayKey();
+    const ttlMs = config.coldDayTtlMinutes * 60_000;
+
+    const missing: string[] = [];
+    const stale: string[] = [];
+    for (const slug of wanted) {
+      const state = store.getLeagueDay(day, slug);
+      if (!state) { missing.push(slug); continue; }
+      // Today is kept current by live polling; other days go stale on a timer
+      // so postponements and reschedules eventually land.
+      if (!isToday && now - state.fetchedAt > ttlMs) stale.push(slug);
+    }
+
+    /*
+     * Anything already on hand is refreshed in the background. The caller is
+     * answered from cache immediately — a fixture list that is up to half an
+     * hour old is worth far more now than a fresh one in twenty seconds.
+     */
+    if (stale.length && !this.refreshing.has(day)) {
+      this.refreshing.add(day);
+      void (async () => {
+        let cursor = 0;
+        const worker = async () => {
+          while (cursor < stale.length) {
+            const slug = stale[cursor++];
+            if (!slug) break;
+            await this.fetchLeagueDay(slug, day, true);
+            await sleep(40);
+          }
+        };
+        await Promise.all(Array.from({ length: 4 }, worker));
+        console.log(`[sched] refreshed ${stale.length} stale league-days for ${day}`);
+      })().finally(() => this.refreshing.delete(day));
+    }
+
     if (missing.length === 0) return;
 
     const key = `${day}:${missing.length === wanted.length ? 'all' : missing.join(',')}`;
