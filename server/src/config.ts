@@ -23,7 +23,21 @@ export const config = {
    * state-aware scheduler keeps the volume affordable anyway.
    */
   pollLiveTier1: num(process.env.POLL_LIVE_TIER1, 5),
-  pollLiveTier2: num(process.env.POLL_LIVE_TIER2, 12),
+  /**
+   * Tier 2 is deliberately slow.
+   *
+   * After removing the 125 competitions FotMob already delivers in one
+   * request, ESPN is exclusively responsible for just 8 tier-1 leagues — the
+   * Kenyan, Ugandan, Zambian, Zimbabwean and South African top flights, CAF
+   * Confederation Cup, the Carabao Cup and CAF World Cup qualifying. Those are
+   * the product's reason to exist and stay fast.
+   *
+   * Everything else ESPN alone carries is a lower division nobody is watching
+   * minute by minute, and polling it hard is the bulk of our footprint against
+   * a source that could withdraw access at any time. Spending that budget on
+   * the eight that matter is the better trade.
+   */
+  pollLiveTier2: num(process.env.POLL_LIVE_TIER2, 30),
 
   /**
    * FotMob supplies the second-level match clock, player ratings, coaches and
