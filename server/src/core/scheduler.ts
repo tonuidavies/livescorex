@@ -257,13 +257,33 @@ export class Scheduler {
   private activeLeagues(): Map<string, 1 | 2> {
     const now = Date.now();
     const active = new Map<string, 1 | 2>();
+
+    /*
+     * Leagues another source is already covering live.
+     *
+     * FotMob returns every live match worldwide in one request, so polling
+     * ESPN league-by-league for a match FotMob has already delivered is pure
+     * duplicate traffic — and it was the bulk of it: 29 active leagues at
+     * 5-12s each dwarfed the single FotMob call. Skipping them leaves ESPN
+     * doing what only it can do, which is Kenya, Ghana, Uganda, Zambia,
+     * Zimbabwe, the NCAA and much of the Americas.
+     */
+    const coveredByFotmob = new Set<string>();
+    for (const m of store.allMatches()) {
+      if (m.source !== 'fotmob') continue;
+      if (m.state === 'live' || m.state === 'halftime') coveredByFotmob.add(m.league.slug);
+    }
+
     for (const m of store.allMatches()) {
       const inWindow =
         m.state === 'live' ||
         m.state === 'halftime' ||
         (m.state === 'scheduled' && m.kickoff - now <= config.preKickoffLeadMs && m.kickoff - now > -config.postMatchGraceMs) ||
         (m.state === 'finished' && now - m.updatedAt < config.postMatchGraceMs && now - m.kickoff < 3 * 3600_000);
-      if (inWindow) active.set(m.league.slug, m.league.tier);
+      if (!inWindow) continue;
+      // Another source is already live on this league this minute.
+      if (m.source !== 'fotmob' && coveredByFotmob.has(m.league.slug)) continue;
+      active.set(m.league.slug, m.league.tier);
     }
     return active;
   }

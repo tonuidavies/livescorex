@@ -70,7 +70,8 @@ export const config = {
 
   tier1Extra: (process.env.TIER1_EXTRA ?? '').split(',').map(s => s.trim()).filter(Boolean),
 
-  snapshotPath: join(DATA_DIR, '..', 'snapshot.json'),
+  /** Overridable so a container can point state at a mounted volume. */
+  snapshotPath: join(process.env.SNAPSHOT_DIR ?? join(DATA_DIR, '..'), 'snapshot.json'),
   snapshotIntervalMs: 60_000,
 } as const;
 

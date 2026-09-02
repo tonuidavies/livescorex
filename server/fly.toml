@@ -1,0 +1,35 @@
+# fly launch --no-deploy   then   fly deploy
+app = "livescorex"
+primary_region = "jnb"          # Johannesburg, the closest Fly region to Nairobi
+
+[build]
+
+[env]
+  PORT = "8787"
+  SNAPSHOT_DIR = "/app/state"
+  ODDS_ENABLED = "false"        # see the gambling-policy note in the README
+  POLL_FOTMOB_LIVE = "2"
+  POLL_FOTMOB_IDLE = "30"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  # Exactly one machine, always.
+  #
+  # Every instance polls upstream independently, so a second one does not
+  # share the load — it doubles the traffic to ESPN and FotMob and doubles the
+  # chance of being blocked. If this ever needs to serve more phones, scale the
+  # WebSocket fan-out, never the poller.
+  auto_stop_machines = false
+  auto_start_machines = false
+  min_machines_running = 1
+
+[[vm]]
+  # Measured at 17 MB resident with no perceptible CPU; this is generous.
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "livescorex_state"
+  destination = "/app/state"

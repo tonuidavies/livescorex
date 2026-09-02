@@ -10,7 +10,7 @@ export interface Device {
   updatedAt: number;
 }
 
-const PATH = join(DATA_DIR, '..', 'devices.json');
+const PATH = join(process.env.SNAPSHOT_DIR ?? join(DATA_DIR, '..'), 'devices.json');
 
 /**
  * Push registration.
